@@ -59,7 +59,7 @@ scene.add(hemisphereLight);
 // Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.minDistance = 10;
-controls.maxDistance = 120;
+controls.maxDistance = 100;
 controls.maxPolarAngle = Math.PI / 2 - 0.01;
 
 // Floor (Ground) with PBR Material
