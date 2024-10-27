@@ -104,7 +104,7 @@ gltfLoader.load(
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
-        node.material.roughness *= 0.978;
+        node.material.roughness *= 0.979;
         node.material.metalness *= 0.5;
         node.material.emissive = new THREE.Color(node.material.emissive || 0x000000);
         node.material.emissiveIntensity = 1.5;
