@@ -10,12 +10,16 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-renderer.shadowMap.enabled = true; // Enable shadow maps
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Soft shadows
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.physicallyCorrectLights = true;
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xdedede); // A light gray background for neutral lighting
+scene.background = new THREE.Color(0xdedede);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -24,18 +28,17 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-
 camera.position.set(35, 35, 30);
 scene.add(camera);
 
-// Light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Softer ambient light to simulate indirect lighting
+// Ambient Light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Increased to soften shadows
 scene.add(ambientLight);
 
 // Directional Light (Sunlight)
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
-directionalLight.position.set(50, 100, 50); // Simulating sunlight from a high angle
-directionalLight.castShadow = true; // Enable shadows
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Slightly reduced intensity
+directionalLight.position.set(50, 100, 50);
+directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 2048;
 directionalLight.shadow.mapSize.height = 2048;
 directionalLight.shadow.camera.near = 0.5;
@@ -44,16 +47,20 @@ directionalLight.shadow.camera.left = -100;
 directionalLight.shadow.camera.right = 100;
 directionalLight.shadow.camera.top = 100;
 directionalLight.shadow.camera.bottom = -100;
-
+directionalLight.shadow.bias = -0.005; // Reduces shadow acne and dark spots
 scene.add(directionalLight);
 
-// Additional Light (Fill Light)
-const pointLight = new THREE.PointLight(0xffffff, 0.8);
-pointLight.position.set(-50, 50, -50); // Fills in shadows for a more natural look
+// Light Helper (Optional, for visualization)
+// const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 10);
+// scene.add(dirLightHelper);
+
+// Fill Light
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.set(-50, 50, -50);
 scene.add(pointLight);
 
 // Hemisphere Light for Sky Illumination
-const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0xffffff, 0.5); // Sky blue and ground white
+const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0xffffff, 0.25);
 scene.add(hemisphereLight);
 
 // Orbit Controls
@@ -65,14 +72,14 @@ controls.maxPolarAngle = Math.PI / 2 - 0.01;
 // Floor (Ground) with PBR Material
 const floorGeometry = new THREE.CircleGeometry(1000, 64);
 const floorMaterial = new THREE.MeshStandardMaterial({
-  color: 0x87ceeb, // Sky blue
-  roughness: 0.7, // Roughness for PBR effect
-  metalness: 0 // No metal reflection
+  color: 0x87ceeb,
+  roughness: 0.5,
+  metalness: 0
 });
 const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 floorMesh.rotation.x = -Math.PI / 2;
 floorMesh.position.y = -25;
-floorMesh.receiveShadow = true; // The floor receives shadows
+floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 
 // Sky Sphere
@@ -87,22 +94,23 @@ scene.add(skySphere);
 // GLTF Loader
 const gltfLoader = new GLTFLoader();
 gltfLoader.load(
-  './models/alxislandv3.glb',
+  './models/alxisland3.glb',
   (gltf) => {
     const model = gltf.scene;
     model.position.set(0, 1, 0);
-    model.scale.set(2, 2, 2);
+    model.scale.set(0.4, 0.4, 0.4);
+    
     model.traverse((node) => {
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
-        node.material = new THREE.MeshStandardMaterial({
-          color: node.material.color,
-          roughness: 0.7,
-          metalness: 0.1
-        });
+        node.material.roughness *= 0.978;
+        node.material.metalness *= 0.5;
+        node.material.emissive = new THREE.Color(node.material.emissive || 0x000000);
+        node.material.emissiveIntensity = 1.5;
       }
     });
+
     scene.add(model);
   },
   undefined,
