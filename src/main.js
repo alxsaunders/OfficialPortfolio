@@ -65,7 +65,7 @@ scene.add(hemisphereLight);
 
 // Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.minDistance = 10;
+controls.minDistance = 0;
 controls.maxDistance = 100;
 controls.maxPolarAngle = Math.PI / 2 - 0.01;
 
@@ -94,7 +94,7 @@ scene.add(skySphere);
 // GLTF Loader
 const gltfLoader = new GLTFLoader();
 gltfLoader.load(
-  './models/alxisland3.glb',
+  './models/alxisland90.glb',
   (gltf) => {
     const model = gltf.scene;
     model.position.set(0, 1, 0);
