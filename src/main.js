@@ -15,7 +15,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 0.8;  // Reduced from 1.2 to decrease overall brightness
 renderer.physicallyCorrectLights = true;
 
 // Scene
@@ -47,11 +47,11 @@ new RGBELoader()
     pmremGenerator.dispose();
 });
 
-// Lights (reduced intensity due to environment lighting)
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+// Lights (further reduced intensity)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);  // Reduced from 0.3
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);  // Reduced from 0.5
 directionalLight.position.set(50, 100, 50);
 directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 2048;
@@ -65,11 +65,11 @@ directionalLight.shadow.camera.bottom = -100;
 directionalLight.shadow.bias = -0.005;
 scene.add(directionalLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 0.3);
+const pointLight = new THREE.PointLight(0xffffff, 0.2);  // Reduced from 0.3
 pointLight.position.set(-50, 50, -50);
 scene.add(pointLight);
 
-const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0xffffff, 0.15);
+const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0xffffff, 0.05);  // Reduced from 0.15
 scene.add(hemisphereLight);
 
 // Orbit Controls
@@ -78,21 +78,8 @@ controls.minDistance = 0;
 controls.maxDistance = 100;
 controls.maxPolarAngle = Math.PI / 2 - 0.01;
 
-// Floor with enhanced PBR material
-const floorGeometry = new THREE.CircleGeometry(1000, 64);
-const floorMaterial = new THREE.MeshStandardMaterial({
-  color: 0x87ceeb,
-  roughness: 0.1,  // More reflective
-  metalness: 0.8,  // More metallic
-  envMapIntensity: 1.0  // Control environment map reflection intensity
-});
-const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
-floorMesh.rotation.x = -Math.PI / 2;
-floorMesh.position.y = -25;
-floorMesh.receiveShadow = true;
-scene.add(floorMesh);
 
-// GLTF Loader with enhanced materials
+// GLTF Loader with adjusted material properties
 const gltfLoader = new GLTFLoader();
 gltfLoader.load(
   './models/alxisland90.glb',
@@ -106,12 +93,12 @@ gltfLoader.load(
         node.castShadow = true;
         node.receiveShadow = true;
         
-        // Enhance material properties for better reflections
+        // Adjusted material properties for less intense reflections
         if (node.material) {
-          node.material.roughness *= 0.97;  // More reflective
-          node.material.metalness *= 0.8;  // More metallic
-          node.material.envMapIntensity = 1.2;  // Stronger environment reflections
-          node.material.needsUpdate = true;  // Important when modifying materials
+          node.material.roughness *= 0.97;  // Increased from 0.97 to reduce reflections
+          node.material.metalness *= 0.6;  // Reduced from 0.8
+          node.material.envMapIntensity = 0.8;  // Reduced from 1.2
+          node.material.needsUpdate = true;
         }
       }
     });
