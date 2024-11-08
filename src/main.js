@@ -15,7 +15,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.8;  // Reduced from 1.2 to decrease overall brightness
+renderer.toneMappingExposure = 0.82;  // Reduced from 1.2 to decrease overall brightness
 renderer.physicallyCorrectLights = true;
 
 // Scene
@@ -48,10 +48,10 @@ new RGBELoader()
 });
 
 // Lights (further reduced intensity)
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);  // Reduced from 0.3
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);  // Reduced from 0.3
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);  // Reduced from 0.5
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.01);  // Reduced from 0.5
 directionalLight.position.set(50, 100, 50);
 directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 4096;  // Increased from 2048
@@ -87,7 +87,7 @@ gltfLoader.load(
   (gltf) => {
     const model = gltf.scene;
     model.position.set(0, 1, 0);
-    model.scale.set(0.15, 0.15, 0.15);
+    model.scale.set(0.5, 0.5, 0.5);
     
     model.traverse((node) => {
       if (node.isMesh) {
@@ -112,7 +112,6 @@ gltfLoader.load(
   }
 );
 
-// Draw
 const clock = new THREE.Clock();
 
 function draw() {
