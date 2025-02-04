@@ -15,4 +15,4 @@ npm start
 npm run build
 -------------------------
 
-my 3d portfolio
+my 3d portfolio.
