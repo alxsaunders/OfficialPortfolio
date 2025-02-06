@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    overflow: hidden;
+}
+
+.webgl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+}
+
+.nav-menu {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1;
+}
+
+.nav-menu ul {
+    list-style: none;
+}
+
+.nav-menu li {
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.nav-menu li:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
