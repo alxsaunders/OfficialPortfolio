@@ -83,7 +83,7 @@ controls.maxPolarAngle = Math.PI / 2 - 0.01;
 // GLTF Loader with adjusted material properties
 const gltfLoader = new GLTFLoader();
 gltfLoader.load(
-  './models/alxisland90.glb',
+  './models/alxisland.glb',
   (gltf) => {
     const model = gltf.scene;
     model.position.set(0, 1, 0);
