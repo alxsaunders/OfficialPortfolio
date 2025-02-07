@@ -7,11 +7,9 @@ module.exports = merge(
     {
         mode: 'development',
         devServer: {
-            host: 'local-ip',
+            host: 'localhost',
             port: 3000,
             open: true,
-            https: false,
-            allowedHosts: 'all',
             hot: true,
             watchFiles: ['src/**', 'static/**'],
             static: {

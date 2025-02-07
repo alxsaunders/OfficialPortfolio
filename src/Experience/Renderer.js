@@ -19,7 +19,7 @@ export default class Renderer {
         })
         
         this.instance.physicallyCorrectLights = true
-        this.instance.outputEncoding = THREE.sRGBEncoding
+        this.instance.outputColorSpace = THREE.SRGBColorSpace  // Updated from outputEncoding
         this.instance.toneMapping = THREE.CineonToneMapping
         this.instance.toneMappingExposure = 1.75
         this.instance.shadowMap.enabled = true

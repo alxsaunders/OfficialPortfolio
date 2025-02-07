@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import Experience from '../Experience.js'
 
 export default class House {
     constructor() {
@@ -7,16 +6,35 @@ export default class House {
         this.scene = this.experience.scene
         this.resources = this.experience.resources
         
-        // Setup
-        this.model = this.resources.items.houseModel
-        this.setModel()
+        // Only set up the model if it's available
+        if (this.resources.items.alxislandModel) {
+            this.setModel()
+        } else {
+            // Wait for the model to load
+            this.resources.on('ready', () => {
+                if (this.resources.items.alxislandModel) {
+                    this.setModel()
+                }
+            })
+        }
     }
 
     setModel() {
-        this.model.scene.scale.set(1, 1, 1)
-        this.scene.add(this.model.scene)
+        this.model = this.resources.items.alxislandModel
+        if (!this.model || !this.model.scene) {
+            console.error('Model or model scene is undefined')
+            return
+        }
 
-        this.model.scene.traverse((child) => {
+        this.actualModel = this.model.scene
+        
+        // Set up the model
+        this.actualModel.scale.set(.1, .1, .1)
+        this.actualModel.position.set(0, 0, 0)
+        this.scene.add(this.actualModel)
+
+        // Set up shadows
+        this.actualModel.traverse((child) => {
             if(child instanceof THREE.Mesh) {
                 child.castShadow = true
                 child.receiveShadow = true
@@ -25,6 +43,6 @@ export default class House {
     }
 
     update() {
-        // Add any animations or updates needed
+        // Add any update logic here
     }
 }
