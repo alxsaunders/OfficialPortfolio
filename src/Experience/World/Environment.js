@@ -34,7 +34,6 @@ export default class Environment {
         
         // Set background and environment
         
-        
         this.scene.background = envMap
         this.scene.environment = envMap
         
