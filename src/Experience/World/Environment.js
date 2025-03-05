@@ -73,6 +73,7 @@ export default class Environment {
     update() {
         // Add any update logic here if needed
         
+        
     }
 
     destroy() {
