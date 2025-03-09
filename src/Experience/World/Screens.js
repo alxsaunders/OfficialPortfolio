@@ -148,6 +148,7 @@ export default class Screens {
     }
 
     setScreens() {
+        
         // Find screens in the model
         this.resources.items.alxislandModel.scene.traverse((child) => {
             if(child.name.startsWith('Screen_')) {
@@ -158,6 +159,8 @@ export default class Screens {
                     map: this.states[child.name]?.textures.main || this.resources.items.creditsTexture,
                     transparent: true
                 })
+
+                
 
                 // Store original material for later
                 child.userData.originalMaterial = child.material
