@@ -15,7 +15,25 @@ export default class Screens {
         this.testingMode = false // Set to true to enable screen testing
 
         // STARTING POINT: Default ideal camera positions for each screen
-       
+        this.idealCameraPositions = {
+            "Screen_About": {
+                "camera": { "x": -0.34, "y": 2.53, "z": 2.43 },
+                "target": { "x": -5.87, "y": 2.48, "z": 2.22 }
+            },
+            "Screen_Projects": {
+                "camera": { "x": -6.18, "y": 1.29, "z": 2.63 },
+                "target": { "x": -6.30, "y": 1.29, "z": 11.46 }
+            },
+            "Screen_Credits": {
+                "camera": { "x": -9.17, "y": 1.11, "z": 2.45 },
+                "target": { "x": -3.98, "y": 1.1, "z": 2.36 }
+            },
+            "Screen_Video": {
+                "camera": { "x": -2.80, "y": 1.58, "z": 1.03 },
+                "target": { "x": -7.02, "y": 0.49, "z": 3.48 }
+            }
+        }
+
         this.currentTestScreen = null
 
         // Setup screens
