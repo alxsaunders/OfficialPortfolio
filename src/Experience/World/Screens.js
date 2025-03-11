@@ -15,25 +15,7 @@ export default class Screens {
         this.testingMode = false // Set to true to enable screen testing
 
         // STARTING POINT: Default ideal camera positions for each screen
-        this.idealCameraPositions = {
-            "Screen_About": {
-                "camera": { "x": -3.25, "y": 4.12, "z": -2.85 },
-                "target": { "x": -1.25, "y": 2.48, "z": -0.37 }
-            },
-            "Screen_Projects": {
-                "camera": { "x": 2.45, "y": 3.75, "z": -1.63 },
-                "target": { "x": 4.25, "y": 2.32, "z": 0.45 }
-            },
-            "Screen_Credits": {
-                "camera": { "x": -2.50, "y": 3.80, "z": 2.20 },
-                "target": { "x": -0.75, "y": 2.40, "z": 4.30 }
-            },
-            "Screen_Demo": {
-                "camera": { "x": 3.10, "y": 3.90, "z": 2.50 },
-                "target": { "x": 4.80, "y": 2.45, "z": 4.20 }
-            }
-        }
-
+       
         this.currentTestScreen = null
 
         // Setup screens
@@ -669,6 +651,9 @@ Target:
                 onComplete: () => {
                     this.isTransitioning = false
                     this.activeScreen = screenMesh
+                    this.camera.controls.enableRotate = false
+                    this.camera.controls.enableZoom = false
+                    this.camera.controls.enablePan = false
                 }
             })
         
@@ -756,6 +741,8 @@ Target:
                 this.isTransitioning = false
                 this.activeScreen = null
                 this.camera.controls.enableRotate = true
+                this.camera.controls.enableZoom = true
+                this.camera.controls.enablePan = true
             }
         })
         
@@ -764,7 +751,7 @@ Target:
             duration: 1,
             x: -3.23, // Using values from your screenshot
             y: 0.49,
-            z: -0.28,
+            z: -1.49,
             ease: "power2.inOut",
             onUpdate: () => {
                 this.camera.controls.update()
