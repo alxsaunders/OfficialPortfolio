@@ -44,6 +44,11 @@ export default class Screens {
         // Create the exit button
         this.createExitButton()
 
+        // Initialize video properties
+        this.videoElement = null
+        this.isVideoPlaying = false
+        this.videoTexture = null
+
         // Track current states for each screen
         this.states = {
             'Screen_About': {
@@ -74,10 +79,11 @@ export default class Screens {
                     main: this.resources.items.creditsTexture
                 }
             },
-            'Screen_Demo': {
+            'Screen_Video': {
                 currentView: 'main',
                 textures: {
-                    main: this.resources.items.demoTexture
+                    main: null, // Will be set after video loads
+                    video: null  // Will be set after video loads
                 }
             }
         }
@@ -167,10 +173,10 @@ export default class Screens {
                 ]
             },
             'Screen_Credits': {
-                main: [] // No clickable regions for credits screen
+                main: []
             },
-            'Screen_Demo': {
-                main: [] // No clickable regions for demo screen (can add if needed)
+            'Screen_Video': {
+                main: []
             }
         }
 
@@ -189,9 +195,70 @@ export default class Screens {
         this.setScreens()
         this.setupInteraction()
         
+        // Load video after screens are set up
+        this.createVideoTexture()
+        
         // If in testing mode, create testing UI
         if (this.testingMode) {
             this.createTestingUI()
+        }
+    }
+
+    createVideoTexture() {
+        this.videoElement = document.createElement('video')
+        
+        // Set up video element
+        this.videoElement.crossOrigin = 'anonymous'
+        this.videoElement.src = '/textures/screens/portfoliovideo.mp4'
+        this.videoElement.loop = true
+        this.videoElement.muted = true
+        this.videoElement.playsInline = true
+        
+        // Add error handling
+        this.videoElement.addEventListener('error', (e) => {
+            console.error('Video error:', e)
+            console.error('Error state:', this.videoElement.error)
+        })
+        
+        this.videoElement.addEventListener('loadeddata', () => {
+            console.log('Video loaded successfully')
+            this.startVideo()
+        })
+        
+        this.videoElement.addEventListener('canplaythrough', () => {
+            console.log('Video can play through')
+        })
+        
+        // Create video texture
+        this.videoTexture = new THREE.VideoTexture(this.videoElement)
+        this.videoTexture.needsUpdate = true
+        
+        // Update the states with video texture
+        this.states['Screen_Video'].textures.main = this.videoTexture
+        this.states['Screen_Video'].textures.video = this.videoTexture
+        
+        // Update the screen material if it already exists
+        if (this.screenMeshes['Screen_Video']) {
+            this.screenMeshes['Screen_Video'].material.map = this.videoTexture
+            this.screenMeshes['Screen_Video'].material.needsUpdate = true
+        }
+        
+        // Load the video
+        this.videoElement.load()
+    }
+
+    startVideo() {
+        if (this.videoElement) {
+            const playPromise = this.videoElement.play()
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Video playing')
+                    this.isVideoPlaying = true
+                }).catch(error => {
+                    console.error('Error starting video:', error)
+                })
+            }
         }
     }
 
@@ -247,319 +314,6 @@ export default class Screens {
         this.exitButton.style.pointerEvents = 'none'
     }
 
-    createTestingUI() {
-        // Create testing panel
-        const testingPanel = document.createElement('div')
-        testingPanel.id = 'screen-testing-panel'
-        testingPanel.style.position = 'fixed'
-        testingPanel.style.top = '10px'
-        testingPanel.style.right = '10px'
-        testingPanel.style.background = 'rgba(0, 0, 0, 0.7)'
-        testingPanel.style.color = 'white'
-        testingPanel.style.padding = '15px'
-        testingPanel.style.borderRadius = '5px'
-        testingPanel.style.width = '250px'
-        testingPanel.style.maxHeight = '80vh'
-        testingPanel.style.overflowY = 'auto'
-        testingPanel.style.zIndex = '1000'
-        testingPanel.style.fontFamily = 'Arial, sans-serif'
-        
-        testingPanel.innerHTML = `
-            <h3 style="margin-top:0">Screen Testing</h3>
-            <div id="screen-buttons"></div>
-            <div style="margin-top:15px">
-                <h4>Camera Adjustments</h4>
-                <div>
-                    <label>X Position: </label>
-                    <input type="range" id="camera-x" min="-10" max="10" step="0.1" value="0">
-                    <span id="camera-x-value">0</span>
-                </div>
-                <div style="margin-top:5px">
-                    <label>Y Position: </label>
-                    <input type="range" id="camera-y" min="-10" max="10" step="0.1" value="0">
-                    <span id="camera-y-value">0</span>
-                </div>
-                <div style="margin-top:5px">
-                    <label>Z Position: </label>
-                    <input type="range" id="camera-z" min="-10" max="10" step="0.1" value="0">
-                    <span id="camera-z-value">0</span>
-                </div>
-                <div style="margin-top:10px">
-                    <label>Target X: </label>
-                    <input type="range" id="target-x" min="-10" max="10" step="0.1" value="0">
-                    <span id="target-x-value">0</span>
-                </div>
-                <div style="margin-top:5px">
-                    <label>Target Y: </label>
-                    <input type="range" id="target-y" min="-10" max="10" step="0.1" value="0">
-                    <span id="target-y-value">0</span>
-                </div>
-                <div style="margin-top:5px">
-                    <label>Target Z: </label>
-                    <input type="range" id="target-z" min="-10" max="10" step="0.1" value="0">
-                    <span id="target-z-value">0</span>
-                </div>
-                <div style="margin-top:15px">
-                    <button id="save-position">Save Current Position</button>
-                </div>
-                <div style="margin-top:5px">
-                    <button id="copy-positions">Copy All Positions</button>
-                </div>
-                <div style="margin-top:5px">
-                    <button id="test-position">Test Saved Position</button>
-                </div>
-            </div>
-            <div style="margin-top:15px">
-                <h4>Current Position:</h4>
-                <pre id="current-camera-position" style="font-size:11px;"></pre>
-            </div>
-            <div style="margin-top:15px">
-                <h4>Saved Positions:</h4>
-                <pre id="saved-positions" style="font-size:11px;"></pre>
-            </div>
-        `
-        
-        document.body.appendChild(testingPanel)
-        
-        // Populate screen buttons
-        this.updateScreenButtons()
-        
-        // Add event listeners for camera adjustments
-        const sliders = [
-            { id: 'camera-x', valueId: 'camera-x-value', property: 'camera.x' },
-            { id: 'camera-y', valueId: 'camera-y-value', property: 'camera.y' },
-            { id: 'camera-z', valueId: 'camera-z-value', property: 'camera.z' },
-            { id: 'target-x', valueId: 'target-x-value', property: 'target.x' },
-            { id: 'target-y', valueId: 'target-y-value', property: 'target.y' },
-            { id: 'target-z', valueId: 'target-z-value', property: 'target.z' }
-        ]
-        
-        sliders.forEach(slider => {
-            document.getElementById(slider.id).addEventListener('input', (e) => {
-                const value = parseFloat(e.target.value)
-                document.getElementById(slider.valueId).textContent = value.toFixed(2)
-                if (this.currentTestScreen) {
-                    this.adjustCameraPosition(slider.property, value)
-                }
-            })
-        })
-        
-        // Add event listener for save button
-        document.getElementById('save-position').addEventListener('click', () => {
-            if (this.currentTestScreen) {
-                this.saveCurrentPosition(this.currentTestScreen.name)
-            }
-        })
-        
-        // Add event listener for copy button
-        document.getElementById('copy-positions').addEventListener('click', () => {
-            const positionsStr = JSON.stringify(this.idealCameraPositions, null, 2)
-            navigator.clipboard.writeText(positionsStr)
-            alert('All positions copied to clipboard!')
-        })
-        
-        // Add event listener for test button
-        document.getElementById('test-position').addEventListener('click', () => {
-            if (this.currentTestScreen) {
-                this.testSavedPosition(this.currentTestScreen.name)
-            }
-        })
-        
-        // Update current position display every frame
-        this.updatePositionDisplay()
-    }
-    
-    updateScreenButtons() {
-        const buttonContainer = document.getElementById('screen-buttons')
-        buttonContainer.innerHTML = ''
-        
-        // Create button for each screen
-        Object.values(this.screenMeshes).forEach(screen => {
-            const button = document.createElement('button')
-            button.textContent = screen.name.replace('Screen_', '')
-            button.style.margin = '5px'
-            button.style.padding = '8px'
-            button.style.cursor = 'pointer'
-            
-            button.addEventListener('click', () => {
-                this.testScreen(screen)
-            })
-            
-            buttonContainer.appendChild(button)
-        })
-    }
-    
-    updatePositionDisplay() {
-        const positionDisplay = document.getElementById('current-camera-position')
-        if (positionDisplay) {
-            const camera = this.camera.instance
-            const target = this.camera.controls.target
-            
-            positionDisplay.textContent = `Camera:
-  x: ${camera.position.x.toFixed(2)},
-  y: ${camera.position.y.toFixed(2)},
-  z: ${camera.position.z.toFixed(2)}
-Target:
-  x: ${target.x.toFixed(2)},
-  y: ${target.y.toFixed(2)},
-  z: ${target.z.toFixed(2)}`
-        }
-        
-        // Update saved positions display
-        const savedDisplay = document.getElementById('saved-positions')
-        if (savedDisplay) {
-            savedDisplay.textContent = JSON.stringify(this.idealCameraPositions, null, 2)
-        }
-        
-        // Continue updating
-        requestAnimationFrame(() => this.updatePositionDisplay())
-    }
-    
-    testScreen(screen) {
-        this.currentTestScreen = screen
-        this.showExitButton() // Show exit button when testing a screen
-        
-        // Check if we have saved positions for this screen
-        if (this.idealCameraPositions[screen.name]) {
-            const savedPos = this.idealCameraPositions[screen.name]
-            
-            // Update sliders to reflect saved positions
-            const updateSlider = (id, value) => {
-                const slider = document.getElementById(id)
-                const valueDisplay = document.getElementById(`${id}-value`)
-                slider.value = value
-                valueDisplay.textContent = value.toFixed(2)
-            }
-            
-            updateSlider('camera-x', savedPos.camera.x)
-            updateSlider('camera-y', savedPos.camera.y)
-            updateSlider('camera-z', savedPos.camera.z)
-            updateSlider('target-x', savedPos.target.x)
-            updateSlider('target-y', savedPos.target.y)
-            updateSlider('target-z', savedPos.target.z)
-            
-            // Move camera to saved position
-            this.camera.instance.position.set(
-                savedPos.camera.x,
-                savedPos.camera.y,
-                savedPos.camera.z
-            )
-            
-            this.camera.controls.target.set(
-                savedPos.target.x,
-                savedPos.target.y,
-                savedPos.target.z
-            )
-            
-            this.camera.controls.update()
-        } else {
-            // If no saved position, calculate basic position
-            const targetPosition = new THREE.Vector3()
-            screen.getWorldPosition(targetPosition)
-            
-            // Get screen orientation
-            const screenQuaternion = screen.getWorldQuaternion(new THREE.Quaternion())
-            const normal = new THREE.Vector3(0, 0, 1)
-            normal.applyQuaternion(screenQuaternion)
-            normal.normalize()
-            
-            // Position camera
-            const cameraPosition = targetPosition.clone()
-            cameraPosition.sub(normal.multiplyScalar(2.0))
-            
-            this.camera.instance.position.set(
-                cameraPosition.x,
-                cameraPosition.y,
-                cameraPosition.z
-            )
-            
-            this.camera.controls.target.set(
-                targetPosition.x,
-                targetPosition.y,
-                targetPosition.z
-            )
-            
-            this.camera.controls.update()
-            
-            // Update sliders
-            const updateSlider = (id, value) => {
-                const slider = document.getElementById(id)
-                const valueDisplay = document.getElementById(`${id}-value`)
-                slider.value = value
-                valueDisplay.textContent = value.toFixed(2)
-            }
-            
-            updateSlider('camera-x', cameraPosition.x)
-            updateSlider('camera-y', cameraPosition.y)
-            updateSlider('camera-z', cameraPosition.z)
-            updateSlider('target-x', targetPosition.x)
-            updateSlider('target-y', targetPosition.y)
-            updateSlider('target-z', targetPosition.z)
-        }
-        
-        this.activeScreen = screen
-    }
-    
-    adjustCameraPosition(property, value) {
-        const [objectName, propName] = property.split('.')
-        
-        if (objectName === 'camera') {
-            // Adjust camera position
-            this.camera.instance.position[propName] = value
-        } else if (objectName === 'target') {
-            // Adjust target position
-            this.camera.controls.target[propName] = value
-        }
-        
-        this.camera.controls.update()
-    }
-    
-    testSavedPosition(screenName) {
-        if (!this.idealCameraPositions[screenName]) return
-        
-        const savedPos = this.idealCameraPositions[screenName]
-        
-        gsap.to(this.camera.instance.position, {
-            duration: 1,
-            x: savedPos.camera.x,
-            y: savedPos.camera.y,
-            z: savedPos.camera.z,
-            ease: "power2.inOut"
-        })
-        
-        gsap.to(this.camera.controls.target, {
-            duration: 1,
-            x: savedPos.target.x,
-            y: savedPos.target.y,
-            z: savedPos.target.z,
-            ease: "power2.inOut",
-            onUpdate: () => {
-                this.camera.controls.update()
-            }
-        })
-    }
-    
-    saveCurrentPosition(screenName) {
-        const camera = this.camera.instance
-        const target = this.camera.controls.target
-        
-        // Save both camera and target positions
-        this.idealCameraPositions[screenName] = {
-            camera: {
-                x: camera.position.x,
-                y: camera.position.y,
-                z: camera.position.z
-            },
-            target: {
-                x: target.x,
-                y: target.y,
-                z: target.z
-            }
-        }
-        
-        console.log(`Saved position for ${screenName}:`, this.idealCameraPositions[screenName])
-    }
-
     setScreens() {
         // Find screens in the model
         this.resources.items.alxislandModel.scene.traverse((child) => {
@@ -568,7 +322,7 @@ Target:
                 
                 // Create material for screen
                 const material = new THREE.MeshBasicMaterial({
-                    map: this.states[child.name]?.textures.main || this.resources.items.creditsTexture,
+                    map: this.states[child.name]?.textures.main,
                     transparent: true
                 })
 
@@ -624,6 +378,12 @@ Target:
 
     handleScreenClick(screenMesh, intersect) {
         if(this.isTransitioning) return
+
+        // If clicking on the video screen, open YouTube
+        if (screenMesh.name === 'Screen_Video') {
+            window.open('https://www.youtube.com/watch?v=hO2FvV09F-A', '_blank')
+            return
+        }
 
         const screenState = this.states[screenMesh.name]
         const currentView = screenState ? screenState.currentView || screenState.currentTab : null
@@ -877,6 +637,11 @@ Target:
             if(screenMesh !== this.activeScreen) {
                 screenMesh.material.opacity = 0.8
             }
+        }
+
+        // Update video texture
+        if (this.videoTexture) {
+            this.videoTexture.needsUpdate = true
         }
     }
 }

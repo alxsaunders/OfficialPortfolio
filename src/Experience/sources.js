@@ -73,10 +73,12 @@ export default [
         path: '/textures/screens/projects/project8.png'
     },
     // ... project3 through project8 ...
+    
     // Credits Screen
      {
          name: 'creditsTexture',
         type: 'texture',
          path: '/textures/screens/credits.png'
-     }
+     },
+     
 ]
