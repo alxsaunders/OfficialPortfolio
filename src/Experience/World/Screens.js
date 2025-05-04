@@ -198,10 +198,325 @@ export default class Screens {
         // Load video after screens are set up
         this.createVideoTexture()
         
+        // Create debug UI panel
+        this.createDebugUI()
+        
         // If in testing mode, create testing UI
         if (this.testingMode) {
             this.createTestingUI()
         }
+    }
+
+    createDebugUI() {
+        // Create debug panel
+        this.debugPanel = document.createElement('div')
+        this.debugPanel.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 340px;
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 90vh;
+            overflow-y: auto;
+        `
+        
+        // Create title
+        const title = document.createElement('h3')
+        title.textContent = 'Screen Adjustment Panel'
+        title.style.margin = '0 0 10px 0'
+        this.debugPanel.appendChild(title)
+        
+        // Create screen selector
+        const screenSelect = document.createElement('select')
+        screenSelect.style.cssText = `
+            padding: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+        `
+        screenSelect.innerHTML = `
+            <option value="">Select a screen</option>
+            <option value="Screen_About">About Screen</option>
+            <option value="Screen_Projects">Projects Screen</option>
+            <option value="Screen_Credits">Credits Screen</option>
+            <option value="Screen_Video">Video Screen</option>
+        `
+        this.debugPanel.appendChild(screenSelect)
+        
+        // Create adjustment controls
+        const controls = document.createElement('div')
+        controls.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        `
+        
+        // UV transform values with additional properties
+        this.uvTransform = {
+            offsetX: 0,
+            offsetY: 0,
+            scale: 1,
+            rotation: 0,
+            invertX: false,
+            invertY: false,
+            fullscreen: false
+        }
+        
+        // Create controls
+        const createButton = (text, action) => {
+            const btn = document.createElement('button')
+            btn.textContent = text
+            btn.style.cssText = `
+                padding: 8px;
+                cursor: pointer;
+                border: 1px solid #444;
+                background: #222;
+                color: white;
+                border-radius: 4px;
+            `
+            btn.addEventListener('click', action)
+            return btn
+        }
+        
+        const createToggleButton = (text, property) => {
+            const btn = createButton(text, () => {
+                this.uvTransform[property] = !this.uvTransform[property]
+                btn.style.backgroundColor = this.uvTransform[property] ? '#066' : '#222'
+                this.applyUVTransform()
+            })
+            return btn
+        }
+        
+        // Fullscreen mode toggle (now with better aspect ratio handling)
+        const fullscreenButton = createToggleButton('Fix Aspect Ratio (16:9)', 'fullscreen')
+        fullscreenButton.style.marginBottom = '10px'
+        controls.appendChild(fullscreenButton)
+        
+        // Position controls
+        const positionLabel = document.createElement('div')
+        positionLabel.textContent = 'Position Controls:'
+        positionLabel.style.marginTop = '10px'
+        controls.appendChild(positionLabel)
+        
+        const uvControls = document.createElement('div')
+        uvControls.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        `
+        
+        uvControls.appendChild(createButton('← Left', () => this.adjustUV('offsetX', -0.1)))
+        uvControls.appendChild(createButton('↑ Up', () => this.adjustUV('offsetY', 0.1)))
+        uvControls.appendChild(createButton('→ Right', () => this.adjustUV('offsetX', 0.1)))
+        uvControls.appendChild(createButton('← Left (S)', () => this.adjustUV('offsetX', -0.01)))
+        uvControls.appendChild(createButton('↓ Down', () => this.adjustUV('offsetY', -0.1)))
+        uvControls.appendChild(createButton('→ Right (S)', () => this.adjustUV('offsetX', 0.01)))
+        controls.appendChild(uvControls)
+        
+        // Scale controls
+        const scaleLabel = document.createElement('div')
+        scaleLabel.textContent = 'Scale Controls:'
+        scaleLabel.style.marginTop = '10px'
+        controls.appendChild(scaleLabel)
+        
+        const scaleControls = document.createElement('div')
+        scaleControls.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        `
+        scaleControls.appendChild(createButton('Zoom In', () => this.adjustUV('scale', -0.1)))
+        scaleControls.appendChild(createButton('Zoom Out', () => this.adjustUV('scale', 0.1)))
+        scaleControls.appendChild(createButton('Zoom In (S)', () => this.adjustUV('scale', -0.01)))
+        scaleControls.appendChild(createButton('Zoom Out (S)', () => this.adjustUV('scale', 0.01)))
+        controls.appendChild(scaleControls)
+        
+        // Rotation controls
+        const rotationLabel = document.createElement('div')
+        rotationLabel.textContent = 'Rotation Controls:'
+        rotationLabel.style.marginTop = '10px'
+        controls.appendChild(rotationLabel)
+        
+        const rotationControls = document.createElement('div')
+        rotationControls.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        `
+        rotationControls.appendChild(createButton('↻ 90°', () => this.adjustUV('rotation', 90)))
+        rotationControls.appendChild(createButton('↺ -90°', () => this.adjustUV('rotation', -90)))
+        controls.appendChild(rotationControls)
+        
+        // Flip controls
+        const flipLabel = document.createElement('div')
+        flipLabel.textContent = 'Flip Controls:'
+        flipLabel.style.marginTop = '10px'
+        controls.appendChild(flipLabel)
+        
+        const flipControls = document.createElement('div')
+        flipControls.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        `
+        
+        const invertXButton = createToggleButton('Flip Horizontal', 'invertX')
+        const invertYButton = createToggleButton('Flip Vertical', 'invertY')
+        flipControls.appendChild(invertXButton)
+        flipControls.appendChild(invertYButton)
+        controls.appendChild(flipControls)
+        
+        // Reset button
+        const resetButton = createButton('Reset All', () => {
+            this.uvTransform = { 
+                offsetX: 0, 
+                offsetY: 0, 
+                scale: 1, 
+                rotation: 0,
+                invertX: false,
+                invertY: false,
+                fullscreen: false 
+            }
+            fullscreenButton.style.backgroundColor = '#222'
+            invertXButton.style.backgroundColor = '#222'
+            invertYButton.style.backgroundColor = '#222'
+            this.applyUVTransform()
+        })
+        resetButton.style.marginTop = '10px'
+        resetButton.style.backgroundColor = '#444'
+        controls.appendChild(resetButton)
+        
+        // Export values button
+        const exportButton = createButton('Export Values', () => this.exportUVValues())
+        exportButton.style.marginTop = '10px'
+        exportButton.style.backgroundColor = '#066'
+        controls.appendChild(exportButton)
+        
+        this.debugPanel.appendChild(controls)
+        
+        // Toggle panel with keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' && e.ctrlKey) {
+                this.debugPanel.style.display = 
+                    this.debugPanel.style.display === 'none' ? 'flex' : 'none'
+            }
+        })
+        
+        // Store screen selector reference
+        this.screenSelect = screenSelect
+        
+        document.body.appendChild(this.debugPanel)
+        
+        console.log('Debug UI: Press Ctrl+P to toggle the panel')
+    }
+
+    // Method to adjust UV transform
+    adjustUV(property, delta) {
+        const selectedScreen = this.screenSelect.value
+        if (!selectedScreen) {
+            alert('Please select a screen first')
+            return
+        }
+        
+        this.uvTransform[property] += delta
+        this.applyUVTransform(selectedScreen)
+    }
+
+    // Method to apply UV transform to selected screen
+    applyUVTransform(screenName = this.screenSelect.value) {
+        if (!screenName) return
+        
+        const screen = this.screenMeshes[screenName]
+        if (!screen || !screen.geometry) return
+        
+        const uvAttribute = screen.geometry.attributes.uv
+        if (!uvAttribute) return
+        
+        const uv = uvAttribute.array
+        
+        // Store the original UV if not already stored
+        if (!screen.userData.originalUV) {
+            screen.userData.originalUV = new Float32Array(uv)
+        }
+        
+        const originalUV = screen.userData.originalUV
+        
+        for (let i = 0; i < uv.length; i += 2) {
+            let u = originalUV[i]
+            let v = originalUV[i + 1]
+            
+            // Apply rotation
+            if (this.uvTransform.rotation !== 0) {
+                const angle = this.uvTransform.rotation * Math.PI / 180
+                const centerU = u - 0.5
+                const centerV = v - 0.5
+                
+                const rotatedU = centerU * Math.cos(angle) - centerV * Math.sin(angle)
+                const rotatedV = centerU * Math.sin(angle) + centerV * Math.cos(angle)
+                
+                u = rotatedU + 0.5
+                v = rotatedV + 0.5
+            }
+            
+            // Apply aspect ratio correction for 1920x1080 content
+            if (this.uvTransform.fullscreen) {
+                // Aspect ratio of 1920x1080 is 16:9
+                const imageAspectRatio = 16 / 9
+                
+                // Scale to maintain aspect ratio
+                const scaleU = imageAspectRatio / 1.0 // Adjust horizontal
+                u = (u - 0.5) / scaleU + 0.5
+            }
+            
+            // Apply scale (zoom)
+            u = (u - 0.5) * this.uvTransform.scale + 0.5
+            v = (v - 0.5) * this.uvTransform.scale + 0.5
+            
+            // Apply offset
+            u += this.uvTransform.offsetX
+            v += this.uvTransform.offsetY
+            
+            // Apply inversion
+            if (this.uvTransform.invertX) {
+                u = 1 - u
+            }
+            if (this.uvTransform.invertY) {
+                v = 1 - v
+            }
+            
+            uv[i] = u
+            uv[i + 1] = v
+        }
+        
+        uvAttribute.needsUpdate = true
+        screen.geometry.computeBoundingSphere()
+    }
+
+    // Method to export current UV values
+    exportUVValues() {
+        const selectedScreen = this.screenSelect.value
+        if (!selectedScreen) {
+            alert('Please select a screen first')
+            return
+        }
+        
+        const output = {
+            screen: selectedScreen,
+            transform: { ...this.uvTransform }
+        }
+        
+        console.log('UV Transform Values:', JSON.stringify(output, null, 2))
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(JSON.stringify(output, null, 2))
+            .then(() => alert('UV values copied to clipboard!'))
+            .catch(() => alert('Failed to copy to clipboard'))
     }
 
     createVideoTexture() {
@@ -314,7 +629,7 @@ export default class Screens {
         this.exitButton.style.pointerEvents = 'none'
     }
 
-    setScreens() {
+  setScreens() {
         // Find screens in the model
         this.resources.items.alxislandModel.scene.traverse((child) => {
             if(child.name.startsWith('Screen_')) {
@@ -325,7 +640,7 @@ export default class Screens {
                     map: this.states[child.name]?.textures.main,
                     transparent: true
                 })
-
+                
                 // Store original material for later
                 child.userData.originalMaterial = child.material
                 
@@ -334,6 +649,100 @@ export default class Screens {
                 
                 // Store reference to screen
                 this.screenMeshes[child.name] = child
+                
+                // Apply custom UV transforms for each screen
+                if (child.geometry) {
+                    const uvAttribute = child.geometry.attributes.uv
+                    if (uvAttribute) {
+                        const uv = uvAttribute.array
+                        
+                        // Store original UV coordinates
+                        child.userData.originalUV = new Float32Array(uv)
+                        
+                        // Apply screen-specific transforms
+                        if (child.name === 'Screen_Credits') {
+                            // Apply saved transform values for Credits screen
+                            const transform = {
+                                offsetX: 0.13,
+                                offsetY: 0.6,
+                                scale: 2.100000000000001,
+                                rotation: -270,
+                                invertX: false,
+                                invertY: true,
+                                fullscreen: true
+                            }
+                            
+                            for (let i = 0; i < uv.length; i += 2) {
+                                let u = uv[i]
+                                let v = uv[i + 1]
+                                
+                                // Apply rotation
+                                if (transform.rotation !== 0) {
+                                    const angle = transform.rotation * Math.PI / 180
+                                    const centerU = u - 0.5
+                                    const centerV = v - 0.5
+                                    
+                                    const rotatedU = centerU * Math.cos(angle) - centerV * Math.sin(angle)
+                                    const rotatedV = centerU * Math.sin(angle) + centerV * Math.cos(angle)
+                                    
+                                    u = rotatedU + 0.5
+                                    v = rotatedV + 0.5
+                                }
+                                
+                                // Apply aspect ratio correction
+                                if (transform.fullscreen) {
+                                    const imageAspectRatio = 16 / 9
+                                    const scaleU = imageAspectRatio / 1.0
+                                    u = (u - 0.5) / scaleU + 0.5
+                                }
+                                
+                                // Apply scale
+                                u = (u - 0.5) * transform.scale + 0.5
+                                v = (v - 0.5) * transform.scale + 0.5
+                                
+                                // Apply offset
+                                u += transform.offsetX
+                                v += transform.offsetY
+                                
+                                // Apply inversion
+                                if (transform.invertX) {
+                                    u = 1 - u
+                                }
+                                if (transform.invertY) {
+                                    v = 1 - v
+                                }
+                                
+                                uv[i] = u
+                                uv[i + 1] = v
+                            }
+                        } else {
+                            // For other screens, just apply basic rotation
+                            for (let i = 0; i < uv.length; i += 2) {
+                                // Get current UV coordinates
+                                const oldU = uv[i]
+                                const oldV = uv[i + 1]
+                                
+                                // First, rotate 90 degrees clockwise to fix orientation
+                                uv[i] = 1 - oldV
+                                uv[i + 1] = oldU
+                            }
+                            
+                            // Apply aspect ratio correction for video screen
+                            if (child.name === 'Screen_Video') {
+                                for (let i = 0; i < uv.length; i += 2) {
+                                    let u = uv[i]
+                                    const imageAspectRatio = 16 / 9
+                                    const scaleU = imageAspectRatio / 1.0
+                                    u = (u - 0.5) / scaleU + 0.5
+                                    uv[i] = u
+                                }
+                            }
+                        }
+                        
+                        uvAttribute.needsUpdate = true
+                        child.geometry.computeBoundingSphere()
+                    }
+                }
             }
         })
     }
