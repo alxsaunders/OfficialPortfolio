@@ -9,6 +9,22 @@ export default [
         type: 'hdrTexture',
         path: './textures/hdr/sky.hdr'  // Update this path
     },
+    // Cover textures for screens
+    {
+        name: 'aboutcoverTexture',
+        type: 'texture',
+        path: '/textures/screens/about/aboutcover.png'
+    },
+    {
+        name: 'projectscoverTexture',
+        type: 'texture',
+        path: '/textures/screens/projects/projectscover.png'
+    },
+    {
+        name: 'creditscoverTexture',
+        type: 'texture',
+        path: '/textures/screens/creditscover.png'
+    },
     // About Me Screen Textures
     {
         name: 'aboutMainTexture',
@@ -72,13 +88,11 @@ export default [
         type: 'texture',
         path: '/textures/screens/projects/project8.png'
     },
-    // ... project3 through project8 ...
-    
     // Credits Screen
-     {
-         name: 'creditsTexture',
+    {
+        name: 'creditsTexture',
         type: 'texture',
-         path: '/textures/screens/credits.png'
-     },
-     
+        path: '/textures/screens/credits.png'
+    },
+    
 ]
