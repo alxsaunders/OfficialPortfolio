@@ -18,6 +18,9 @@ export default class ScreenUI {
             fullscreen: false
         }
 
+        // Create project bounds debug UI
+        this.createProjectBoundsDebugUI()
+        
         // Create UI elements
         this.createExitButton()
         this.createDebugUI()
@@ -93,18 +96,46 @@ export default class ScreenUI {
             border-radius: 8px;
             width: 340px;
             z-index: 1001;
-            display: none;
+            display: flex;
             flex-direction: column;
             gap: 10px;
             max-height: 90vh;
             overflow-y: auto;
         `
         
-        // Create title
+        // Create title with close button
+        const titleContainer = document.createElement('div')
+        titleContainer.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        `
+        
         const title = document.createElement('h3')
         title.textContent = 'Screen Adjustment Panel'
-        title.style.margin = '0 0 10px 0'
-        this.debugPanel.appendChild(title)
+        title.style.margin = '0'
+        
+        const closeButton = document.createElement('button')
+        closeButton.textContent = '✕'
+        closeButton.style.cssText = `
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        `
+        closeButton.addEventListener('click', () => {
+            this.debugPanel.style.display = 'none'
+        })
+        
+        titleContainer.appendChild(title)
+        titleContainer.appendChild(closeButton)
+        this.debugPanel.appendChild(titleContainer)
         
         // Create screen selector
         const screenSelect = document.createElement('select')
@@ -268,20 +299,12 @@ export default class ScreenUI {
         
         this.debugPanel.appendChild(controls)
         
-        // Toggle panel with keyboard shortcut
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'p' && e.ctrlKey) {
-                this.debugPanel.style.display = 
-                    this.debugPanel.style.display === 'none' ? 'flex' : 'none'
-            }
-        })
-        
         // Store screen selector reference
         this.screenSelect = screenSelect
         
         document.body.appendChild(this.debugPanel)
         
-        console.log('Debug UI: Press Ctrl+P to toggle the panel')
+        console.log('Debug UI: Panel opened automatically. Use the X button to close.')
     }
 
     createTestingUI() {
@@ -376,6 +399,222 @@ export default class ScreenUI {
         if (!screen || !screen.geometry) return
         
         this.screens.textureManager.applyUVTransform(screen, this.uvTransform)
+    }
+
+    createProjectBoundsDebugUI() {
+        // Create overlay container
+        this.boundsOverlay = document.createElement('div')
+        this.boundsOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        `
+        
+        // Create bounds control panel
+        this.boundsPanel = document.createElement('div')
+        this.boundsPanel.style.cssText = `
+            position: fixed;
+            top: 200px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            z-index: 1003;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        `
+        
+        // Title
+        const title = document.createElement('h3')
+        title.textContent = 'Project Bounds Editor'
+        title.style.margin = '0 0 10px 0'
+        this.boundsPanel.appendChild(title)
+        
+        // Toggle button
+        const toggleButton = document.createElement('button')
+        toggleButton.textContent = 'Toggle Bounds Overlay'
+        toggleButton.style.cssText = `
+            padding: 10px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        `
+        toggleButton.addEventListener('click', () => {
+            const isVisible = this.boundsOverlay.style.display === 'block'
+            this.boundsOverlay.style.display = isVisible ? 'none' : 'block'
+            if (!isVisible) {
+                this.updateBoundsOverlay()
+            }
+        })
+        this.boundsPanel.appendChild(toggleButton)
+        
+        // Project selector
+        this.projectSelect = document.createElement('select')
+        this.projectSelect.style.cssText = `
+            padding: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+        `
+        this.projectSelect.innerHTML = `
+            <option value="">Select Project</option>
+            <option value="project1">Project 1 - Future Move</option>
+            <option value="project2">Project 2 - Air Invest</option>
+            <option value="project3">Project 3 - Sound Sketch</option>
+            <option value="project4">Project 4 - My Portfolio</option>
+            <option value="project5">Project 5 - Nexus</option>
+            <option value="project6">Project 6 - V & V</option>
+            <option value="project7">Project 7 - Nearby Nexus</option>
+            <option value="project8">Project 8 - Elevate</option>
+        `
+        this.boundsPanel.appendChild(this.projectSelect)
+        
+        // Bounds inputs
+        this.boundsInputs = {}
+        const boundsLabels = ['x1', 'y1', 'x2', 'y2']
+        boundsLabels.forEach(label => {
+            const inputGroup = document.createElement('div')
+            inputGroup.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 5px;'
+            
+            const labelEl = document.createElement('label')
+            labelEl.textContent = label + ':'
+            labelEl.style.width = '30px'
+            
+            const input = document.createElement('input')
+            input.type = 'number'
+            input.step = '0.01'
+            input.style.cssText = 'flex: 1; padding: 5px;'
+            input.addEventListener('input', () => {
+                this.updateProjectBounds()
+            })
+            
+            this.boundsInputs[label] = input
+            inputGroup.appendChild(labelEl)
+            inputGroup.appendChild(input)
+            this.boundsPanel.appendChild(inputGroup)
+        })
+        
+        // Update project bounds when selection changes
+        this.projectSelect.addEventListener('change', () => {
+            this.loadProjectBounds()
+        })
+        
+        // Export button
+        const exportButton = document.createElement('button')
+        exportButton.textContent = 'Export All Bounds'
+        exportButton.style.cssText = `
+            padding: 10px;
+            background: #008800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        `
+        exportButton.addEventListener('click', () => {
+            this.exportProjectBounds()
+        })
+        this.boundsPanel.appendChild(exportButton)
+        
+        document.body.appendChild(this.boundsOverlay)
+        document.body.appendChild(this.boundsPanel)
+        
+        // Show the panel
+        this.boundsPanel.style.display = 'flex'
+    }
+    
+    updateBoundsOverlay() {
+        // Clear existing overlays
+        this.boundsOverlay.innerHTML = ''
+        
+        // Get current project bounds from the screens manager
+        const projectBounds = this.screens.clickableRegions['Screen_Projects']['main']
+        
+        projectBounds.forEach((project, index) => {
+            const bounds = project.bounds
+            const overlay = document.createElement('div')
+            overlay.style.cssText = `
+                position: absolute;
+                left: ${bounds.x1 * 100}vw;
+                top: ${bounds.y1 * 100}vh;
+                width: ${(bounds.x2 - bounds.x1) * 100}vw;
+                height: ${(bounds.y2 - bounds.y1) * 100}vh;
+                border: 2px solid #ff0000;
+                background: rgba(255, 0, 0, 0.2);
+                pointer-events: auto;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+            `
+            overlay.textContent = `P${index + 1}`
+            overlay.addEventListener('click', () => {
+                this.projectSelect.value = project.name
+                this.loadProjectBounds()
+            })
+            this.boundsOverlay.appendChild(overlay)
+        })
+    }
+    
+    loadProjectBounds() {
+        const selectedProject = this.projectSelect.value
+        if (!selectedProject) return
+        
+        const projectBounds = this.screens.clickableRegions['Screen_Projects']['main']
+        const project = projectBounds.find(p => p.name === selectedProject)
+        
+        if (project) {
+            this.boundsInputs.x1.value = project.bounds.x1
+            this.boundsInputs.y1.value = project.bounds.y1
+            this.boundsInputs.x2.value = project.bounds.x2
+            this.boundsInputs.y2.value = project.bounds.y2
+        }
+    }
+    
+    updateProjectBounds() {
+        const selectedProject = this.projectSelect.value
+        if (!selectedProject) return
+        
+        const projectBounds = this.screens.clickableRegions['Screen_Projects']['main']
+        const project = projectBounds.find(p => p.name === selectedProject)
+        
+        if (project) {
+            project.bounds.x1 = parseFloat(this.boundsInputs.x1.value) || 0
+            project.bounds.y1 = parseFloat(this.boundsInputs.y1.value) || 0
+            project.bounds.x2 = parseFloat(this.boundsInputs.x2.value) || 0
+            project.bounds.y2 = parseFloat(this.boundsInputs.y2.value) || 0
+            
+            // Update visual overlay
+            this.updateBoundsOverlay()
+        }
+    }
+    
+    exportProjectBounds() {
+        const projectBounds = this.screens.clickableRegions['Screen_Projects']['main']
+        const exportData = projectBounds.map(project => ({
+            name: project.name,
+            bounds: { ...project.bounds }
+        }))
+        
+        console.log('Project Bounds:', JSON.stringify(exportData, null, 2))
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
+            .then(() => alert('Project bounds copied to clipboard!'))
+            .catch(() => alert('Failed to copy to clipboard'))
     }
 
     // Method to export current UV values

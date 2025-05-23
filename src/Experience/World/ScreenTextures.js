@@ -30,10 +30,10 @@ export default class ScreenTextures {
                 fullscreen: true
             },
             'Screen_Projects': {
-                offsetX: 0.13,
-                offsetY: 0.6,
-                scale: 2.100000000000001,
-                rotation: -270,
+                offsetX: -0.05999999999999999,
+                offsetY: -0.6,
+                scale: 2.000000000000001,
+                rotation: -90,
                 invertX: false,
                 invertY: true,
                 fullscreen: true

@@ -17,11 +17,11 @@ export default class Screens {
         // Testing mode for positioning
         this.testingMode = false // Set to true to enable screen testing
 
-        // STARTING POINT: Default ideal camera positions for each screen
+        // STARTING POINT: Default ideal camera positions for each screen (only About and Credits adjusted for straight angles)
         this.idealCameraPositions = {
             "Screen_About": {
-                "camera": { "x": -0.34, "y": 2.53, "z": 2.43 },
-                "target": { "x": -5.87, "y": 2.48, "z": 2.22 }
+                "camera": { "x": -2.0, "y": 2.5, "z": 2.5 },
+                "target": { "x": -5.5, "y": 2.5, "z": 2.5 }
             },
             "Screen_Projects": {
                 "camera": { "x": -6.18, "y": 1.29, "z": 2.63 },
@@ -226,44 +226,46 @@ export default class Screens {
             'Screen_Projects': {
                 cover: [], // No regions on cover image, clicking anywhere enters the screen
                 main: [
+                    // Top row project icons (improved bounds - slightly larger and better centered)
                     {
-                        name: 'project1',
-                        bounds: { x1: 0.1, y1: 0.1, x2: 0.3, y2: 0.3 },
+                        name: 'project1', // Future Move
+                        bounds: { x1: 0.19, y1: 0.60, x2: 0.31, y2: 0.89 },
                         action: () => this.showProject('project1')
                     },
                     {
-                        name: 'project2',
-                        bounds: { x1: 0.35, y1: 0.1, x2: 0.55, y2: 0.3 },
+                        name: 'project2', // Air Invest
+                        bounds: { x1: 0.36, y1: 0.60, x2: 0.47, y2: 0.90 },
                         action: () => this.showProject('project2')
                     },
                     {
-                        name: 'project3',
-                        bounds: { x1: 0.6, y1: 0.1, x2: 0.8, y2: 0.3 },
+                        name: 'project3', // Sound Sketch
+                        bounds: { x1: 0.52, y1: 0.60, x2: 0.64, y2: 0.89 },
                         action: () => this.showProject('project3')
                     },
                     {
-                        name: 'project4',
-                        bounds: { x1: 0.1, y1: 0.4, x2: 0.3, y2: 0.6 },
+                        name: 'project4', // My Portfolio
+                        bounds: { x1: 0.68, y1: 0.60, x2: 0.80, y2: 0.89 },
                         action: () => this.showProject('project4')
                     },
+                    // Bottom row project icons
                     {
-                        name: 'project5',
-                        bounds: { x1: 0.35, y1: 0.4, x2: 0.55, y2: 0.6 },
+                        name: 'project5', // Nexus
+                        bounds: { x1: 0.19, y1: 0.32, x2: 0.31, y2: 0.60 },
                         action: () => this.showProject('project5')
                     },
                     {
-                        name: 'project6',
-                        bounds: { x1: 0.6, y1: 0.4, x2: 0.8, y2: 0.6 },
+                        name: 'project6', // V & V
+                        bounds: { x1: 0.35, y1: 0.32, x2: 0.48, y2: 0.61 },
                         action: () => this.showProject('project6')
                     },
                     {
-                        name: 'project7',
-                        bounds: { x1: 0.1, y1: 0.7, x2: 0.3, y2: 0.9 },
+                        name: 'project7', // Nearby Nexus
+                        bounds: { x1: 0.51, y1: 0.32, x2: 0.64, y2: 0.60 },
                         action: () => this.showProject('project7')
                     },
                     {
-                        name: 'project8',
-                        bounds: { x1: 0.35, y1: 0.7, x2: 0.55, y2: 0.9 },
+                        name: 'project8', // Elevate
+                        bounds: { x1: 0.68, y1: 0.32, x2: 0.80, y2: 0.60 },
                         action: () => this.showProject('project8')
                     }
                 ]
@@ -277,16 +279,18 @@ export default class Screens {
             }
         }
 
-        // Add back button regions for each project page
+        // Add back button regions for each project page (individual project detail pages)
         for(let i = 1; i <= 8; i++) {
             this.clickableRegions['Screen_Projects'][`project${i}`] = [
                 {
                     name: 'backButton',
-                    bounds: { x1: 0.1, y1: 0.9, x2: 0.2, y2: 1.0 },
+                    bounds: { x1: 0.05, y1: 0.05, x2: 0.15, y2: 0.15 },
                     action: () => this.showProjectMain()
                 }
             ]
         }
+
+        console.log('Project clickable regions setup:', this.clickableRegions['Screen_Projects'])
 
         // Initialize sub-modules
         this.textureManager = new ScreenTextures(this)
@@ -314,11 +318,8 @@ export default class Screens {
                 }
                 
                 // Create material for screen with reduced brightness
-                // About screen gets extra darkening (10% darker)
-                let materialColor = 0x888888 // Default darkening for all screens
-                if (child.name === 'Screen_About') {
-                    materialColor = 0x7A7A7A // 10% darker than default
-                }
+                // All screens use the same darkening level
+                let materialColor = 0x888888 // Standard darkening for all screens
                 
                 const material = new THREE.MeshBasicMaterial({
                     map: initialTexture,

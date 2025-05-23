@@ -98,10 +98,18 @@ export default class ScreenInteraction {
         // Get clickable regions for current screen and state
         const regions = this.screens.clickableRegions[screenMesh.name]?.[currentView] || []
         
+        // Debug logging
+        console.log('Screen clicked:', screenMesh.name)
+        console.log('Current view:', currentView)
+        console.log('Available regions:', regions.length)
+        console.log('Click UV coordinates:', uv)
+        
         // Check if click is within any clickable region
         for(const region of regions) {
+            console.log(`Checking region ${region.name}:`, region.bounds)
             if(uv.x >= region.bounds.x1 && uv.x <= region.bounds.x2 && 
                uv.y >= region.bounds.y1 && uv.y <= region.bounds.y2) {
+                console.log(`Region ${region.name} clicked!`)
                 region.action()
                 return
             }
