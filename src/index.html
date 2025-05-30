@@ -1,20 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Portfolio</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .webgl {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* iOS-style Navigation Menu - LEFT SIDE */
+        .nav-menu {
+            position: fixed;
+            left: 20px;
+            /* LEFT SIDE */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            animation: slideInFromLeft 0.6s ease-out;
+            /* Ensure menu stays within viewport */
+            max-height: calc(100vh - 100px);
+            margin-top: 50px;
+            margin-bottom: 50px;
+            width: auto;
+            max-width: 220px;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            width: auto;
+        }
+
+        .nav-menu li {
+            display: block;
+            padding: 16px 24px;
+            margin: 8px 0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            min-width: 160px;
+            max-width: 200px;
+            animation: fadeInItemFromLeft 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        .nav-menu li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.1) 0%,
+                    rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Hover - move RIGHT since menu is on LEFT */
+        .nav-menu li:hover {
+            transform: translateX(5px);
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-menu li:hover::before {
+            opacity: 1;
+        }
+
+        .nav-menu li:active {
+            transform: translateX(3px) scale(0.98);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-menu li.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transform: translateX(8px);
+        }
+
+        /* Screen indicator dot - on RIGHT side since menu is on LEFT */
+        .nav-menu li.active::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .nav-menu {
+                left: 10px;
+                margin-top: 40px;
+                margin-bottom: 40px;
+                max-height: calc(100vh - 80px);
+            }
+
+            .nav-menu li {
+                padding: 14px 20px;
+                font-size: 14px;
+                min-width: 140px;
+            }
+        }
+
+        /* For very tall screens, limit vertical centering */
+        @media (min-height: 900px) {
+            .nav-menu {
+                top: 400px;
+                transform: translateY(0);
+            }
+        }
+
+        /* For short screens, position from top */
+        @media (max-height: 600px) {
+            .nav-menu {
+                top: 60px;
+                transform: translateY(0);
+                max-height: calc(100vh - 120px);
+            }
+        }
+
+        /* Loading state */
+        .nav-menu.loading {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Entrance animation from LEFT */
+        @keyframes slideInFromLeft {
+            from {
+                transform: translateY(-50%) translateX(-100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(-50%) translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Individual item animations from LEFT */
+        .nav-menu li:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .nav-menu li:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .nav-menu li:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .nav-menu li:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeInItemFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
+
 <body>
     <canvas class="webgl"></canvas>
     <nav class="nav-menu">
         <ul>
-            <li data-screen="projects">Projects</li>
-            <li data-screen="about">About</li>
-            <li data-screen="credits">Credits</li>
-            <li data-screen="video">Demo</li>
+            <li data-screen="Screen_Projects">Projects</li>
+            <li data-screen="Screen_About">About</li>
+            <li data-screen="Screen_Credits">Credits</li>
+            <li data-screen="Screen_Video">2D Portfolio</li>
         </ul>
     </nav>
+
+    <!-- Import Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const navItems = document.querySelectorAll('.nav-menu li');
+            const navMenu = document.querySelector('.nav-menu');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    // Remove active class from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+
+                    // Add active class to clicked item
+                    this.classList.add('active');
+
+                    // Get screen name
+                    const screenName = this.getAttribute('data-screen');
+
+                    // Add loading state
+                    navMenu.classList.add('loading');
+
+                    // Check if experience is available (it might not be loaded yet)
+                    const checkAndFocusScreen = () => {
+                        if (window.experience && window.experience.world && window.experience.world.screens) {
+                            const screens = window.experience.world.screens;
+                            const screenMesh = screens.screenMeshes[screenName];
+
+                            if (screenMesh) {
+                                // Check if screen is in cover mode
+                                const screenState = screens.states[screenName];
+
+                                if (screenState && screenState.hasOwnProperty('inCoverMode') && screenState.inCoverMode) {
+                                    // Exit cover mode first
+                                    screenState.inCoverMode = false;
+
+                                    // Reset to starting state
+                                    if (screenName === 'Screen_About') {
+                                        screenState.currentTab = 'main';
+                                    } else if (screenName === 'Screen_Projects') {
+                                        screenState.currentView = 'main';
+                                    } else if (screenName === 'Screen_Credits') {
+                                        screenState.currentView = 'main';
+                                    }
+
+                                    // Update texture
+                                    screenMesh.material.map = screenState.textures.main;
+                                    if (screenName === 'Screen_Projects') {
+                                        screenMesh.material.emissive = new THREE.Color(0x222222);
+                                        screenMesh.material.emissiveIntensity = 0.3;
+                                    }
+                                    screenMesh.material.needsUpdate = true;
+                                }
+
+                                screens.focusScreen(screenMesh);
+
+                                // Remove loading state after animation
+                                setTimeout(() => {
+                                    navMenu.classList.remove('loading');
+                                }, 1000);
+                            }
+                        } else {
+                            // If experience is not ready, try again in 100ms
+                            setTimeout(checkAndFocusScreen, 100);
+                        }
+                    };
+
+                    checkAndFocusScreen();
+                });
+            });
+
+            // Listen for escape key to clear active state
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                }
+            });
+
+            // Override exitScreenView to clear active state
+            const checkAndOverrideExit = setInterval(() => {
+                if (window.experience?.world?.screens?.exitScreenView) {
+                    const screens = window.experience.world.screens;
+                    const originalExitScreenView = screens.exitScreenView.bind(screens);
+
+                    screens.exitScreenView = function () {
+                        originalExitScreenView();
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                    };
+
+                    clearInterval(checkAndOverrideExit);
+                }
+            }, 100);
+        });
+    </script>
 </body>
+
 </html>

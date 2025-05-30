@@ -51,7 +51,7 @@ export default class Camera {
         // Setup
         this.setInstance()
         this.setControls()
-        this.createPositionDisplay()
+        // this.createPositionDisplay() // COMMENTED OUT
         
         // Optional: Play intro animation
         // Uncomment this to enable a startup animation
@@ -64,6 +64,8 @@ export default class Camera {
     }
 
     createPositionDisplay() {
+        // COMMENTED OUT - Position display creation
+        /*
         // Create element to display camera position if it doesn't exist
         if (!document.getElementById('camera-position-display')) {
             const positionDisplay = document.createElement('div')
@@ -80,6 +82,7 @@ export default class Camera {
             positionDisplay.style.zIndex = '1000'
             document.body.appendChild(positionDisplay)
         }
+        */
     }
 
     setInstance() {
@@ -247,6 +250,8 @@ export default class Camera {
     update() {
         this.controls.update()
         
+        // COMMENTED OUT - Position logging and display update
+        /*
         // Log camera position every 5 seconds
         if (this.time && (this.time.elapsed - this.lastLogTime > this.logInterval)) {
             const positionInfo = {
@@ -281,5 +286,6 @@ export default class Camera {
             
             this.lastLogTime = this.time.elapsed
         }
+        */
     }
 }

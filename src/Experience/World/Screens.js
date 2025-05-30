@@ -229,43 +229,43 @@ export default class Screens {
                     // Top row project icons (improved bounds - slightly larger and better centered)
                     {
                         name: 'project1', // Future Move
-                        bounds: { x1: 0.19, y1: 0.60, x2: 0.31, y2: 0.89 },
+                        bounds: { x1: 0.19, y1: 0.58, x2: 0.31, y2: 0.77 },
                         action: () => this.showProject('project1')
                     },
                     {
                         name: 'project2', // Air Invest
-                        bounds: { x1: 0.36, y1: 0.60, x2: 0.47, y2: 0.90 },
+                        bounds: { x1: 0.36, y1: 0.58, x2: 0.47, y2: 0.77 },
                         action: () => this.showProject('project2')
                     },
                     {
                         name: 'project3', // Sound Sketch
-                        bounds: { x1: 0.52, y1: 0.60, x2: 0.64, y2: 0.89 },
+                        bounds: { x1: 0.52, y1: 0.58, x2: 0.64, y2: 0.77 },
                         action: () => this.showProject('project3')
                     },
                     {
                         name: 'project4', // My Portfolio
-                        bounds: { x1: 0.68, y1: 0.60, x2: 0.80, y2: 0.89 },
+                        bounds: { x1: 0.68, y1: 0.58, x2: 0.80, y2: 0.77 },
                         action: () => this.showProject('project4')
                     },
                     // Bottom row project icons
                     {
                         name: 'project5', // Nexus
-                        bounds: { x1: 0.19, y1: 0.32, x2: 0.31, y2: 0.60 },
+                        bounds: { x1: 0.19, y1: 0.30, x2: 0.31, y2: 0.49 },
                         action: () => this.showProject('project5')
                     },
                     {
                         name: 'project6', // V & V
-                        bounds: { x1: 0.35, y1: 0.32, x2: 0.48, y2: 0.61 },
+                        bounds: { x1: 0.35, y1: 0.30, x2: 0.48, y2: 0.49 },
                         action: () => this.showProject('project6')
                     },
                     {
                         name: 'project7', // Nearby Nexus
-                        bounds: { x1: 0.51, y1: 0.32, x2: 0.64, y2: 0.60 },
+                        bounds: { x1: 0.51, y1: 0.30, x2: 0.64, y2: 0.49 },
                         action: () => this.showProject('project7')
                     },
                     {
                         name: 'project8', // Elevate
-                        bounds: { x1: 0.68, y1: 0.32, x2: 0.80, y2: 0.60 },
+                        bounds: { x1: 0.68, y1: 0.30, x2: 0.80, y2: 0.49 },
                         action: () => this.showProject('project8')
                     }
                 ]
@@ -279,13 +279,30 @@ export default class Screens {
             }
         }
 
-        // Add back button regions for each project page (individual project detail pages)
+        // Add back button and GitHub button regions for each project page
+        const projectGitHubLinks = {
+            project1: 'https://github.com/alxsaunders/FutureMove',
+            project2: 'https://github.com/alxsaunders/AirInvest',
+            project3: 'https://github.com/alxsaunders/SoundSketch',
+            project4: 'https://github.com/alxsaunders/OfficialPortfolio',
+            project5: 'https://github.com/alxsaunders/Nexus',
+            project6: 'https://github.com/alxsaunders/vines-and-victuals',
+            project7: 'https://github.com/alxsaunders/NearbyNexus',
+            project8: 'https://github.com/alxsaunders/elevate'
+        }
+
         for(let i = 1; i <= 8; i++) {
-            this.clickableRegions['Screen_Projects'][`project${i}`] = [
+            const projectKey = `project${i}`
+            this.clickableRegions['Screen_Projects'][projectKey] = [
                 {
                     name: 'backButton',
                     bounds: { x1: 0.04, y1: 0.78, x2: 0.14, y2: 0.95 },
                     action: () => this.showProjectMain()
+                },
+                {
+                    name: 'githubButton',
+                    bounds: { x1: 0.61, y1: 0.46, x2: 0.72, y2: 0.52 },
+                    action: () => window.open(projectGitHubLinks[projectKey], '_blank')
                 }
             ]
         }
@@ -321,9 +338,11 @@ export default class Screens {
                 const material = new THREE.MeshStandardMaterial({
                     map: initialTexture,
                     transparent: true,
-                    color: 0xffffff,
-                    roughness: 0.8,     // Higher roughness for less reflectivity
-                    metalness: 0.1      // Low metalness for screen-like appearance
+                    color: child.name === 'Screen_Projects' ? 0xffffff : 0xcccccc,    // Full brightness for projects, darker for others
+                    roughness: child.name === 'Screen_Projects' ? 0.7 : 0.9,     // Less rough for projects (more reflective)
+                    metalness: child.name === 'Screen_Projects' ? 0.1 : 0.0,      // Slight metalness for projects
+                    emissive: child.name === 'Screen_Projects' ? 0x333333 : 0x000000,  // Add emissive glow for projects
+                    emissiveIntensity: child.name === 'Screen_Projects' ? 0.4 : 0.0     // Emissive intensity for projects
                 })
                 
                 // Store original material for later
@@ -598,5 +617,6 @@ export default class Screens {
         
         this.interactionManager.update()
         this.textureManager.update()
+        // this.uiManager.updateCameraInfo() // COMMENTED OUT
     }
 }

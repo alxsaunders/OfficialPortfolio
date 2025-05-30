@@ -1,0 +1,201 @@
+/* iOS-style Navigation Menu - LEFT SIDE */
+.nav-menu {
+    position: fixed;
+    left: 20px;
+    /* Changed from right to LEFT */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    animation: slideInFromLeft 0.6s ease-out;
+    /* Updated animation */
+}
+
+.nav-menu ul {
+    list-style: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-menu li {
+    padding: 16px 24px;
+    margin: 8px 0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    min-width: 160px;
+    animation: fadeInItemFromLeft 0.4s ease-out forwards;
+    /* Updated animation */
+    opacity: 0;
+}
+
+.nav-menu li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover - move RIGHT since menu is on LEFT */
+.nav-menu li:hover {
+    transform: translateX(5px);
+    /* Changed from -5px to positive */
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.nav-menu li:hover::before {
+    opacity: 1;
+}
+
+.nav-menu li:active {
+    transform: translateX(3px) scale(0.98);
+    /* Changed from -3px to positive */
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-menu li.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transform: translateX(8px);
+    /* Changed from -8px to positive */
+}
+
+/* Screen indicator dot - moved to RIGHT side */
+.nav-menu li.active::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    /* Changed from left to RIGHT */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: pulse 2s infinite;
+}
+
+/* Animation delays for staggered entrance */
+.nav-menu li:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.nav-menu li:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.nav-menu li:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.nav-menu li:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Loading state */
+.nav-menu.loading {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Animations - updated for LEFT side */
+@keyframes slideInFromLeft {
+    from {
+        transform: translateY(-50%) translateX(-100px);
+        /* From LEFT */
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInItemFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+        /* From LEFT */
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-menu {
+        left: 10px;
+        /* Changed from right to LEFT */
+    }
+
+    .nav-menu li {
+        padding: 14px 20px;
+        font-size: 14px;
+        min-width: 140px;
+    }
+}
+
+/* Prevent menu from going off screen */
+@media (max-height: 700px) {
+    .nav-menu {
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+
+    .nav-menu ul {
+        padding: 8px;
+    }
+
+    .nav-menu li {
+        padding: 12px 20px;
+        margin: 6px 0;
+    }
+}
