@@ -61,17 +61,24 @@ export default class ScreenInteraction {
         
         // Handle cover mode for non-video screens
         if (screenState && screenState.hasOwnProperty('inCoverMode') && screenState.inCoverMode) {
-            // If in cover mode, switch to content mode and focus the screen
+            // If in cover mode, switch to content mode and reset to starting state
             screenState.inCoverMode = false
             
-            // Transition from cover to content
+            // Reset each screen to its starting sub-navigation state
+            if (screenMesh.name === 'Screen_About') {
+                screenState.currentTab = 'main'
+            } else if (screenMesh.name === 'Screen_Projects') {
+                screenState.currentView = 'main'
+            } else if (screenMesh.name === 'Screen_Credits') {
+                screenState.currentView = 'main'
+            }
+            
+            // Transition from cover to main content
             gsap.to(screenMesh.material, {
                 opacity: 0,
                 duration: 0.3,
                 onComplete: () => {
-                    // Set appropriate texture based on current tab/view
-                    const currentView = screenState.currentView || screenState.currentTab || 'main'
-                    screenMesh.material.map = screenState.textures[currentView]
+                    screenMesh.material.map = screenState.textures.main
                     gsap.to(screenMesh.material, {
                         opacity: 1,
                         duration: 0.3

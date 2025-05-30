@@ -54,7 +54,7 @@ export default class Screens {
                     skills: this.resources.items.aboutSkillsTexture,
                     experience: this.resources.items.aboutExperienceTexture
                 },
-                inCoverMode: true
+                inCoverMode: true // Start with covers
             },
             'Screen_Projects': {
                 currentView: 'main',
@@ -70,7 +70,7 @@ export default class Screens {
                     project7: this.resources.items.project7Texture,
                     project8: this.resources.items.project8Texture
                 },
-                inCoverMode: true
+                inCoverMode: true // Start with covers
             },
             'Screen_Credits': {
                 currentView: 'main',
@@ -78,7 +78,7 @@ export default class Screens {
                     cover: this.resources.items.creditscoverTexture,
                     main: this.resources.items.creditsTexture
                 },
-                inCoverMode: true
+                inCoverMode: true // Start with covers
             },
             'Screen_Video': {
                 currentView: 'main',
@@ -284,7 +284,7 @@ export default class Screens {
             this.clickableRegions['Screen_Projects'][`project${i}`] = [
                 {
                     name: 'backButton',
-                    bounds: { x1: 0.05, y1: 0.05, x2: 0.15, y2: 0.15 },
+                    bounds: { x1: 0.04, y1: 0.78, x2: 0.14, y2: 0.95 },
                     action: () => this.showProjectMain()
                 }
             ]
@@ -317,14 +317,13 @@ export default class Screens {
                     initialTexture = this.states[child.name]?.textures.cover;
                 }
                 
-                // Create material for screen with reduced brightness
-                // All screens use the same darkening level
-                let materialColor = 0x888888 // Standard darkening for all screens
-                
-                const material = new THREE.MeshBasicMaterial({
+                // Create material for screen using Standard material for good color balance
+                const material = new THREE.MeshStandardMaterial({
                     map: initialTexture,
                     transparent: true,
-                    color: materialColor
+                    color: 0xffffff,
+                    roughness: 0.8,     // Higher roughness for less reflectivity
+                    metalness: 0.1      // Low metalness for screen-like appearance
                 })
                 
                 // Store original material for later
@@ -347,6 +346,14 @@ export default class Screens {
     
         this.isTransitioning = true
     
+        // IMMEDIATELY disable controls to prevent any movement during transition
+        this.camera.controls.enableRotate = false
+        this.camera.controls.enableZoom = false
+        this.camera.controls.enablePan = false
+        
+        // Store the current control target to ensure smooth transition
+        const currentTarget = this.camera.controls.target.clone()
+    
         // Show the exit button
         this.uiManager.showExitButton()
         
@@ -361,12 +368,15 @@ export default class Screens {
                 y: savedPosition.camera.y,
                 z: savedPosition.camera.z,
                 ease: "power2.inOut",
+                onUpdate: () => {
+                    // Force update controls during animation to prevent drift
+                    this.camera.controls.update()
+                },
                 onComplete: () => {
                     this.isTransitioning = false
                     this.activeScreen = screenMesh
-                    this.camera.controls.enableRotate = false
-                    this.camera.controls.enableZoom = false
-                    this.camera.controls.enablePan = false
+                    // Controls already disabled, just update one more time
+                    this.camera.controls.update()
                 }
             })
         
@@ -375,7 +385,11 @@ export default class Screens {
                 x: savedPosition.target.x,
                 y: savedPosition.target.y,
                 z: savedPosition.target.z,
-                ease: "power2.inOut"
+                ease: "power2.inOut",
+                onUpdate: () => {
+                    // Force update controls during animation
+                    this.camera.controls.update()
+                }
             })
             
             return
@@ -399,12 +413,15 @@ export default class Screens {
             y: cameraPosition.y,
             z: cameraPosition.z,
             ease: "power2.inOut",
+            onUpdate: () => {
+                // Force update controls during animation to prevent drift
+                this.camera.controls.update()
+            },
             onComplete: () => {
                 this.isTransitioning = false
                 this.activeScreen = screenMesh
-                this.camera.controls.enableRotate = false
-                this.camera.controls.enableZoom = false
-                this.camera.controls.enablePan = false
+                // Final update
+                this.camera.controls.update()
             }
         })
     
@@ -413,7 +430,11 @@ export default class Screens {
             x: targetPosition.x,
             y: targetPosition.y,
             z: targetPosition.z,
-            ease: "power2.inOut"
+            ease: "power2.inOut",
+            onUpdate: () => {
+                // Force update controls during animation
+                this.camera.controls.update()
+            }
         })
     }
     
@@ -425,28 +446,32 @@ export default class Screens {
         // Hide the exit button
         this.uiManager.hideExitButton()
         
-        // Reset screen to cover mode if applicable
-        if (this.activeScreen) {
-            const screenName = this.activeScreen.name
+        // Don't re-enable controls until animation is complete
+        
+        // Reset ALL screens to cover mode and reset their sub-navigation
+        Object.keys(this.screenMeshes).forEach(screenName => {
             const screenState = this.states[screenName]
+            const screenMesh = this.screenMeshes[screenName]
             
-            if (screenState && screenState.hasOwnProperty('inCoverMode')) {
-                screenState.inCoverMode = true
+            if (screenState && screenMesh) {
+                // Reset to cover mode
+                if (screenState.hasOwnProperty('inCoverMode')) {
+                    screenState.inCoverMode = true
+                    screenMesh.material.map = screenState.textures.cover
+                }
                 
-                // Transition from content to cover
-                gsap.to(this.activeScreen.material, {
-                    opacity: 0,
-                    duration: 0.3,
-                    onComplete: () => {
-                        this.activeScreen.material.map = screenState.textures.cover
-                        gsap.to(this.activeScreen.material, {
-                            opacity: 1,
-                            duration: 0.3
-                        })
-                    }
-                })
+                // Reset sub-navigation to starting state
+                if (screenName === 'Screen_About') {
+                    screenState.currentTab = 'main'
+                } else if (screenName === 'Screen_Projects') {
+                    screenState.currentView = 'main'
+                } else if (screenName === 'Screen_Credits') {
+                    screenState.currentView = 'main'
+                }
+                
+                screenMesh.material.needsUpdate = true
             }
-        }
+        })
         
         // Reset camera to original position
         gsap.to(this.camera.instance.position, {
@@ -455,12 +480,19 @@ export default class Screens {
             y: 3.35,
             z: -30.09,
             ease: "power2.inOut",
+            onUpdate: () => {
+                // Force update controls during animation
+                this.camera.controls.update()
+            },
             onComplete: () => {
                 this.isTransitioning = false
                 this.activeScreen = null
+                // Re-enable controls only after animation completes
                 this.camera.controls.enableRotate = true
                 this.camera.controls.enableZoom = true
                 this.camera.controls.enablePan = true
+                // Final update
+                this.camera.controls.update()
             }
         })
         
@@ -475,6 +507,30 @@ export default class Screens {
                 this.camera.controls.update()
             }
         })
+        
+        console.log('All screens reset to cover mode with fresh start state')
+    }
+    
+    // Helper method to lock camera at exact position
+    lockCameraPosition() {
+        if (this.activeScreen && this.idealCameraPositions[this.activeScreen.name]) {
+            const savedPosition = this.idealCameraPositions[this.activeScreen.name]
+            
+            // Force camera to exact position (prevents any floating point drift)
+            this.camera.instance.position.set(
+                savedPosition.camera.x,
+                savedPosition.camera.y,
+                savedPosition.camera.z
+            )
+            
+            this.camera.controls.target.set(
+                savedPosition.target.x,
+                savedPosition.target.y,
+                savedPosition.target.z
+            )
+            
+            this.camera.controls.update()
+        }
     }
 
     switchAboutTab(tab) {
@@ -535,6 +591,11 @@ export default class Screens {
     }
     
     update() {
+        // Lock camera position if a screen is active and not transitioning
+        if (this.activeScreen && !this.isTransitioning) {
+            this.lockCameraPosition()
+        }
+        
         this.interactionManager.update()
         this.textureManager.update()
     }

@@ -84,7 +84,7 @@ export default class ScreenUI {
     }
 
     createDebugUI() {
-        // Create debug panel
+        // Create debug panel (hidden by default)
         this.debugPanel = document.createElement('div')
         this.debugPanel.style.cssText = `
             position: fixed;
@@ -96,7 +96,7 @@ export default class ScreenUI {
             border-radius: 8px;
             width: 340px;
             z-index: 1001;
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 10px;
             max-height: 90vh;
@@ -299,12 +299,21 @@ export default class ScreenUI {
         
         this.debugPanel.appendChild(controls)
         
+        // Add keyboard shortcut to toggle debug panels
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'd' && e.ctrlKey) {
+                const isDebugVisible = this.debugPanel.style.display === 'flex'
+                this.debugPanel.style.display = isDebugVisible ? 'none' : 'flex'
+                this.boundsPanel.style.display = isDebugVisible ? 'none' : 'flex'
+            }
+        })
+        
         // Store screen selector reference
         this.screenSelect = screenSelect
         
         document.body.appendChild(this.debugPanel)
         
-        console.log('Debug UI: Panel opened automatically. Use the X button to close.')
+        console.log('Debug UI: Panels hidden by default. Press Ctrl+D to toggle.')
     }
 
     createTestingUI() {
@@ -529,8 +538,8 @@ export default class ScreenUI {
         document.body.appendChild(this.boundsOverlay)
         document.body.appendChild(this.boundsPanel)
         
-        // Show the panel
-        this.boundsPanel.style.display = 'flex'
+        // Keep the panel hidden by default
+        // this.boundsPanel.style.display = 'flex'
     }
     
     updateBoundsOverlay() {
