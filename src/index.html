@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Portfolio</title>
+    <title>Alex's Island</title>
     <style>
         * {
             margin: 0;
@@ -295,10 +295,7 @@
 
                                     // Update texture
                                     screenMesh.material.map = screenState.textures.main;
-                                    if (screenName === 'Screen_Projects') {
-                                        screenMesh.material.emissive = new THREE.Color(0x222222);
-                                        screenMesh.material.emissiveIntensity = 0.3;
-                                    }
+                                    // Removed the emissive color changes that were here
                                     screenMesh.material.needsUpdate = true;
                                 }
 
