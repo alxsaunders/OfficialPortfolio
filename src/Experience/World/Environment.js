@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+
 export default class Environment {
     constructor() {
         this.experience = window.experience

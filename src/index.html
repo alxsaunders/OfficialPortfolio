@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex's Island</title>
+
+    <link rel="icon" type="image/x-icon" href="/src/images/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/src/images/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="/src/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" href="/src/images/apple-touch-icon.png">
+    <link rel="manifest" href="/src/images/site.webmanifest">
     <style>
         * {
             margin: 0;
@@ -139,6 +145,26 @@
             animation: pulse 2s infinite;
         }
 
+        /* External link indicator */
+        .nav-menu li.external-link {
+            position: relative;
+        }
+
+        .nav-menu li.external-link::after {
+            content: '↗';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-menu li.external-link:hover::after {
+            opacity: 1;
+        }
+
         @keyframes pulse {
             0% {
                 box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
@@ -243,7 +269,7 @@
             <li data-screen="Screen_Projects">Projects</li>
             <li data-screen="Screen_About">About</li>
             <li data-screen="Screen_Credits">Credits</li>
-            <li data-screen="Screen_Video">2D Portfolio</li>
+            <li data-url="https://alxsaunders.github.io/2D-Portfolio/" class="external-link">2D Portfolio</li>
         </ul>
     </nav>
 
@@ -258,6 +284,15 @@
 
             navItems.forEach(item => {
                 item.addEventListener('click', function () {
+                    // Check if this is an external link
+                    const externalUrl = this.getAttribute('data-url');
+
+                    if (externalUrl) {
+                        // Open external link in new tab
+                        window.open(externalUrl, '_blank');
+                        return;
+                    }
+
                     // Remove active class from all items
                     navItems.forEach(nav => nav.classList.remove('active'));
 

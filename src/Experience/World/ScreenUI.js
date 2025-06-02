@@ -35,22 +35,22 @@ export default class ScreenUI {
         // Create a button element
         this.exitButton = document.createElement('button')
         this.exitButton.id = 'exit-screen-button'
-        this.exitButton.textContent = 'Back to Island'
+        this.exitButton.textContent = 'BACK TO ISLAND'
         
-        // Style the button
+        // Style the button - MADE LARGER
         this.exitButton.style.position = 'fixed'
-        this.exitButton.style.left = '20px'
-        this.exitButton.style.bottom = '20px'
-        this.exitButton.style.padding = '10px 20px'
+        this.exitButton.style.left = '30px'  // Increased from 20px
+        this.exitButton.style.bottom = '30px'  // Increased from 20px
+        this.exitButton.style.padding = '20px 40px'  // Increased from 10px 20px
         this.exitButton.style.background = '#2a2a2a'
         this.exitButton.style.color = 'white'
         this.exitButton.style.border = 'none'
-        this.exitButton.style.borderRadius = '5px'
-        this.exitButton.style.fontSize = '16px'
+        this.exitButton.style.borderRadius = '8px'  // Increased from 5px
+        this.exitButton.style.fontSize = '24px'  // Increased from 16px
         this.exitButton.style.fontWeight = 'bold'
         this.exitButton.style.cursor = 'pointer'
         this.exitButton.style.zIndex = '1000'
-        this.exitButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)'
+        this.exitButton.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.4)'  // Enhanced shadow
         this.exitButton.style.transition = 'all 0.3s ease'
         this.exitButton.style.opacity = '0'  // Start hidden
         this.exitButton.style.pointerEvents = 'none'  // Start disabled
@@ -58,10 +58,12 @@ export default class ScreenUI {
         // Add hover effects
         this.exitButton.addEventListener('mouseover', () => {
             this.exitButton.style.background = '#3a3a3a'
+            this.exitButton.style.transform = 'scale(1.05)'  // Slight scale on hover
         })
         
         this.exitButton.addEventListener('mouseout', () => {
             this.exitButton.style.background = '#2a2a2a'
+            this.exitButton.style.transform = 'scale(1)'
         })
         
         // Add click event

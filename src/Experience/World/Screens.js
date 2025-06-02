@@ -279,7 +279,7 @@ export default class Screens {
             }
         }
 
-        // Add back button and GitHub button regions for each project page
+        // Add button and GitHub button regions for each project page
         const projectGitHubLinks = {
             project1: 'https://github.com/alxsaunders/FutureMove',
             project2: 'https://github.com/alxsaunders/AirInvest',
@@ -335,15 +335,37 @@ export default class Screens {
                 }
                 
                 // Create material for screen using Standard material for good color balance
-                const material = new THREE.MeshStandardMaterial({
+                // Updated material settings with brighter values for Credits screen
+                let materialConfig = {
                     map: initialTexture,
-                    transparent: true,
-                    color: child.name === 'Screen_Projects' ? 0xffffff : 0xcccccc,    // Full brightness for projects, darker for others
-                    roughness: child.name === 'Screen_Projects' ? 0.7 : 0.9,     // Less rough for projects (more reflective)
-                    metalness: child.name === 'Screen_Projects' ? 0.1 : 0.0,      // Slight metalness for projects
-                    emissive: child.name === 'Screen_Projects' ? 0x333333 : 0x000000,  // Add emissive glow for projects
-                    emissiveIntensity: child.name === 'Screen_Projects' ? 0.4 : 0.0     // Emissive intensity for projects
-                })
+                    transparent: true
+                };
+
+                // Configure materials based on screen type
+                if (child.name === 'Screen_Projects') {
+                    // Projects screen - bright and slightly reflective
+                    materialConfig.color = 0xffffff;
+                    materialConfig.roughness = 0.7;
+                    materialConfig.metalness = 0.1;
+                    materialConfig.emissive = 0x333333;
+                    materialConfig.emissiveIntensity = 0.4;
+                } else if (child.name === 'Screen_Credits') {
+                    // Credits screen - make it brighter like Projects
+                    materialConfig.color = 0xffffff;  // Changed from 0xcccccc to full white
+                    materialConfig.roughness = 0.8;   // Slightly less rough than before
+                    materialConfig.metalness = 0.05;  // Add slight metalness
+                    materialConfig.emissive = 0x222222;  // Add emissive glow
+                    materialConfig.emissiveIntensity = 0.3;  // Emissive intensity
+                } else {
+                    // Other screens (About, Video) - moderate brightness
+                    materialConfig.color = 0xe6e6e6;  // Slightly brighter than before
+                    materialConfig.roughness = 0.85;
+                    materialConfig.metalness = 0.0;
+                    materialConfig.emissive = 0x111111;
+                    materialConfig.emissiveIntensity = 0.2;
+                }
+                
+                const material = new THREE.MeshStandardMaterial(materialConfig)
                 
                 // Store original material for later
                 child.userData.originalMaterial = child.material
