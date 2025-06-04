@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
+// IMPORTANT: Heroku assigns the port dynamically
 const PORT = process.env.PORT || 3000;
 
 // Serve static files from dist directory with proper MIME types
@@ -27,8 +28,9 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
+// CRITICAL: Bind to 0.0.0.0 for Heroku d
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📱 Local: http://localhost:${PORT}`);
+  console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📁 Serving files from: ${path.join(__dirname, 'dist')}`);
 });
