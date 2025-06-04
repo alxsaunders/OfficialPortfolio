@@ -21,6 +21,9 @@ export default class ScreenUI {
         // Create project bounds debug UI
         this.createProjectBoundsDebugUI()
         
+        // Create project detail bounds debug UI
+        this.createProjectDetailBoundsDebugUI()
+        
         // Create UI elements
         this.createExitButton()
         this.createDebugUI()
@@ -307,6 +310,7 @@ export default class ScreenUI {
                 const isDebugVisible = this.debugPanel.style.display === 'flex'
                 this.debugPanel.style.display = isDebugVisible ? 'none' : 'flex'
                 this.boundsPanel.style.display = isDebugVisible ? 'none' : 'flex'
+                this.projectDetailPanel.style.display = isDebugVisible ? 'none' : 'flex'
             }
         })
         
@@ -361,6 +365,295 @@ export default class ScreenUI {
         })
         
         document.body.appendChild(testingPanel)
+    }
+
+    // NEW: Create project detail bounds debug UI
+    createProjectDetailBoundsDebugUI() {
+        // Create overlay container for project detail bounds
+        this.projectDetailOverlay = document.createElement('div')
+        this.projectDetailOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        `
+        
+        // Create project detail bounds control panel
+        this.projectDetailPanel = document.createElement('div')
+        this.projectDetailPanel.style.cssText = `
+            position: fixed;
+            top: 50px;
+            left: 350px;
+            background: rgba(0, 50, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 320px;
+            z-index: 1003;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+        `
+        
+        // Title
+        const title = document.createElement('h3')
+        title.textContent = 'Project Detail Buttons'
+        title.style.margin = '0 0 10px 0'
+        title.style.color = '#90ff90'
+        this.projectDetailPanel.appendChild(title)
+        
+        // Toggle button
+        const toggleButton = document.createElement('button')
+        toggleButton.textContent = 'Toggle Button Overlay'
+        toggleButton.style.cssText = `
+            padding: 10px;
+            background: #00aa00;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        `
+        toggleButton.addEventListener('click', () => {
+            const isVisible = this.projectDetailOverlay.style.display === 'block'
+            this.projectDetailOverlay.style.display = isVisible ? 'none' : 'block'
+            if (!isVisible) {
+                this.updateProjectDetailOverlay()
+            }
+        })
+        this.projectDetailPanel.appendChild(toggleButton)
+        
+        // Project selector for detail views
+        this.projectDetailSelect = document.createElement('select')
+        this.projectDetailSelect.style.cssText = `
+            padding: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+        `
+        this.projectDetailSelect.innerHTML = `
+            <option value="">Select Project Detail</option>
+            <option value="project1">Project 1 - Future Move</option>
+            <option value="project2">Project 2 - Air Invest</option>
+            <option value="project3">Project 3 - Sound Sketch</option>
+            <option value="project4">Project 4 - My Portfolio</option>
+            <option value="project5">Project 5 - Nexus</option>
+            <option value="project6">Project 6 - V & V</option>
+            <option value="project7">Project 7 - Nearby Nexus</option>
+            <option value="project8">Project 8 - Elevate</option>
+        `
+        this.projectDetailPanel.appendChild(this.projectDetailSelect)
+        
+        // Button selector
+        this.buttonSelect = document.createElement('select')
+        this.buttonSelect.style.cssText = `
+            padding: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+        `
+        this.buttonSelect.innerHTML = `
+            <option value="">Select Button</option>
+            <option value="backButton">Back Button</option>
+            <option value="githubButton">GitHub Button</option>
+            <option value="walkthroughButton">Walkthrough Button</option>
+            <option value="websiteButton">Website Button</option>
+        `
+        this.projectDetailPanel.appendChild(this.buttonSelect)
+        
+        // Bounds inputs for project detail buttons
+        this.projectDetailBoundsInputs = {}
+        const boundsLabels = ['x1', 'y1', 'x2', 'y2']
+        boundsLabels.forEach(label => {
+            const inputGroup = document.createElement('div')
+            inputGroup.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 5px;'
+            
+            const labelEl = document.createElement('label')
+            labelEl.textContent = label + ':'
+            labelEl.style.width = '30px'
+            labelEl.style.color = '#90ff90'
+            
+            const input = document.createElement('input')
+            input.type = 'number'
+            input.step = '0.01'
+            input.style.cssText = 'flex: 1; padding: 5px;'
+            input.addEventListener('input', () => {
+                this.updateProjectDetailBounds()
+            })
+            
+            this.projectDetailBoundsInputs[label] = input
+            inputGroup.appendChild(labelEl)
+            inputGroup.appendChild(input)
+            this.projectDetailPanel.appendChild(inputGroup)
+        })
+        
+        // Update bounds when selection changes
+        this.projectDetailSelect.addEventListener('change', () => {
+            this.loadProjectDetailBounds()
+        })
+        
+        this.buttonSelect.addEventListener('change', () => {
+            this.loadProjectDetailBounds()
+        })
+        
+        // Quick navigate to project button
+        const navigateButton = document.createElement('button')
+        navigateButton.textContent = 'Go to Selected Project'
+        navigateButton.style.cssText = `
+            padding: 10px;
+            background: #0066aa;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        `
+        navigateButton.addEventListener('click', () => {
+            const selectedProject = this.projectDetailSelect.value
+            if (selectedProject) {
+                this.screens.showProject(selectedProject)
+            }
+        })
+        this.projectDetailPanel.appendChild(navigateButton)
+        
+        // Export button for project detail bounds
+        const exportButton = document.createElement('button')
+        exportButton.textContent = 'Export Project Bounds'
+        exportButton.style.cssText = `
+            padding: 10px;
+            background: #008800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        `
+        exportButton.addEventListener('click', () => {
+            this.exportProjectDetailBounds()
+        })
+        this.projectDetailPanel.appendChild(exportButton)
+        
+        document.body.appendChild(this.projectDetailOverlay)
+        document.body.appendChild(this.projectDetailPanel)
+    }
+    
+    updateProjectDetailOverlay() {
+        // Clear existing overlays
+        this.projectDetailOverlay.innerHTML = ''
+        
+        const selectedProject = this.projectDetailSelect.value
+        if (!selectedProject) return
+        
+        // Get current project detail bounds
+        const projectBounds = this.screens.clickableRegions['Screen_Projects'][selectedProject]
+        
+        if (projectBounds) {
+            projectBounds.forEach((button) => {
+                const bounds = button.bounds
+                const overlay = document.createElement('div')
+                
+                // Color code different buttons
+                let color = '#ff0000'
+                if (button.name === 'backButton') color = '#0066ff'
+                if (button.name === 'githubButton') color = '#ff0000'
+                if (button.name === 'walkthroughButton') color = '#00ff00'
+                if (button.name === 'websiteButton') color = '#ffaa00'
+                
+                overlay.style.cssText = `
+                    position: absolute;
+                    left: ${bounds.x1 * 100}vw;
+                    top: ${(1 - bounds.y2) * 100}vh;
+                    width: ${(bounds.x2 - bounds.x1) * 100}vw;
+                    height: ${(bounds.y2 - bounds.y1) * 100}vh;
+                    border: 2px solid ${color};
+                    background: ${color}40;
+                    pointer-events: auto;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 12px;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                `
+                overlay.textContent = button.name
+                overlay.addEventListener('click', () => {
+                    this.projectDetailSelect.value = selectedProject
+                    this.buttonSelect.value = button.name
+                    this.loadProjectDetailBounds()
+                })
+                this.projectDetailOverlay.appendChild(overlay)
+            })
+        }
+    }
+    
+    loadProjectDetailBounds() {
+        const selectedProject = this.projectDetailSelect.value
+        const selectedButton = this.buttonSelect.value
+        
+        if (!selectedProject || !selectedButton) return
+        
+        const projectBounds = this.screens.clickableRegions['Screen_Projects'][selectedProject]
+        const button = projectBounds?.find(b => b.name === selectedButton)
+        
+        if (button) {
+            this.projectDetailBoundsInputs.x1.value = button.bounds.x1
+            this.projectDetailBoundsInputs.y1.value = button.bounds.y1
+            this.projectDetailBoundsInputs.x2.value = button.bounds.x2
+            this.projectDetailBoundsInputs.y2.value = button.bounds.y2
+            
+            // Update overlay to show this specific button
+            this.updateProjectDetailOverlay()
+        }
+    }
+    
+    updateProjectDetailBounds() {
+        const selectedProject = this.projectDetailSelect.value
+        const selectedButton = this.buttonSelect.value
+        
+        if (!selectedProject || !selectedButton) return
+        
+        const projectBounds = this.screens.clickableRegions['Screen_Projects'][selectedProject]
+        const button = projectBounds?.find(b => b.name === selectedButton)
+        
+        if (button) {
+            button.bounds.x1 = parseFloat(this.projectDetailBoundsInputs.x1.value) || 0
+            button.bounds.y1 = parseFloat(this.projectDetailBoundsInputs.y1.value) || 0
+            button.bounds.x2 = parseFloat(this.projectDetailBoundsInputs.x2.value) || 0
+            button.bounds.y2 = parseFloat(this.projectDetailBoundsInputs.y2.value) || 0
+            
+            // Update visual overlay
+            this.updateProjectDetailOverlay()
+        }
+    }
+    
+    exportProjectDetailBounds() {
+        const selectedProject = this.projectDetailSelect.value
+        if (!selectedProject) {
+            alert('Please select a project first')
+            return
+        }
+        
+        const projectBounds = this.screens.clickableRegions['Screen_Projects'][selectedProject]
+        const exportData = {
+            project: selectedProject,
+            bounds: projectBounds.map(button => ({
+                name: button.name,
+                bounds: { ...button.bounds }
+            }))
+        }
+        
+        console.log('Project Detail Bounds:', JSON.stringify(exportData, null, 2))
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
+            .then(() => alert('Project detail bounds copied to clipboard!'))
+            .catch(() => alert('Failed to copy to clipboard'))
     }
 
     // Toggle between cover image and content

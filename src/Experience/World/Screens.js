@@ -279,35 +279,106 @@ export default class Screens {
             }
         }
 
-        // Add button and GitHub button regions for each project page
-        const projectGitHubLinks = {
-            project1: 'https://github.com/alxsaunders/FutureMove',
-            project2: 'https://github.com/alxsaunders/AirInvest',
-            project3: 'https://github.com/alxsaunders/SoundSketch',
-            project4: 'https://github.com/alxsaunders/OfficialPortfolio',
-            project5: 'https://github.com/alxsaunders/Nexus',
-            project6: 'https://github.com/alxsaunders/vines-and-victuals',
-            project7: 'https://github.com/alxsaunders/NearbyNexus',
-            project8: 'https://github.com/alxsaunders/elevate'
+        // Project-specific URLs with actual links
+        const projectLinks = {
+            project1: { // Future Move
+                website: 'https://future-move.weebly.com/',
+                walkthrough: 'https://youtu.be/dwISjgpyiF8',
+                github: 'https://github.com/alxsaunders/FutureMove'
+            },
+            project2: { // Air Invest
+                website: 'https://airinvest.alex-island.com/',
+                walkthrough: 'https://youtu.be/nqgECSueE0w',
+                github: 'https://github.com/alxsaunders/AirInvest'
+            },
+            project3: { // Sound Sketch
+                website: null, // No website for Sound Sketch
+                walkthrough: 'https://youtu.be/U59bHKjl9wM',
+                github: 'https://github.com/alxsaunders/SoundSketch'
+            },
+            project4: { // My Portfolio
+                website: null, // No website for Portfolio
+                walkthrough: 'https://youtu.be/yno0QPrQBys',
+                github: 'https://github.com/alxsaunders/OfficialPortfolio'
+            },
+            project5: { // Nexus
+                website: 'https://nexus.alex-island.com/',
+                walkthrough: 'https://youtu.be/OXLXycR-zLk',
+                github: 'https://github.com/Servbt/Nexus'
+            },
+            project6: { // V & V (Vines and Victuals)
+                website: 'https://vandv.alex-island.com/',
+                walkthrough: 'https://youtu.be/hGrBZGZ8bWQ',
+                github: 'https://github.com/jshuaaaa/vines-and-victuals'
+            },
+            project7: { // Nearby Nexus
+                website: null, // No website for Nearby Nexus
+                walkthrough: 'https://youtu.be/2VKX64_egq4',
+                github: 'https://github.com/alxsaunders/NearbyNexus'
+            },
+            project8: { // Elevate
+                website: 'https://elevate.alex-island.com/',
+                walkthrough: 'https://youtu.be/WAU9NXzVA6k',
+                github: 'https://github.com/jshuaaaa/elevate'
+            }
         }
 
+        // Enhanced project detail screen clickable regions
         for(let i = 1; i <= 8; i++) {
             const projectKey = `project${i}`
+            const links = projectLinks[projectKey]
+            
             this.clickableRegions['Screen_Projects'][projectKey] = [
+                // Back button (top-left blue circular button) - moved up
                 {
                     name: 'backButton',
-                    bounds: { x1: 0.04, y1: 0.78, x2: 0.14, y2: 0.95 },
+                    bounds: { x1: 0.01, y1: 0.71, x2: 0.22, y2: 0.94 },
                     action: () => this.showProjectMain()
                 },
+                
+                // Website button - "WEBSITE" button (top button) - moved up
+                {
+                    name: 'websiteButton',
+                    bounds: { x1: 0.52, y1: 0.65, x2: 0.85, y2: 0.75 },
+                    action: () => {
+                        if (links.website) {
+                            window.open(links.website, '_blank')
+                        } else {
+                            console.log('No website available for this project')
+                            // Optionally show a toast/notification that no website is available
+                        }
+                    }
+                },
+                
+                // Walkthrough video button - "LINK TO WALKTHROUGH VIDEO" button (middle button) - moved up
+                {
+                    name: 'walkthroughButton',
+                    bounds: { x1: 0.52, y1: 0.54, x2: 0.86, y2: 0.66 },
+                    action: () => {
+                        if (links.walkthrough) {
+                            window.open(links.walkthrough, '_blank')
+                        } else {
+                            console.log('No walkthrough video available for this project')
+                        }
+                    }
+                },
+                
+                // GitHub button - "GITHUB" button (bottom button) - moved up
                 {
                     name: 'githubButton',
-                    bounds: { x1: 0.61, y1: 0.46, x2: 0.72, y2: 0.52 },
-                    action: () => window.open(projectGitHubLinks[projectKey], '_blank')
+                    bounds: { x1: 0.53, y1: 0.45, x2: 0.84, y2: 0.57 },
+                    action: () => window.open(links.github, '_blank')
                 }
             ]
         }
 
-        console.log('Project clickable regions setup:', this.clickableRegions['Screen_Projects'])
+        console.log('Enhanced project clickable regions setup with the following features:')
+        console.log('- Back button (blue circular arrow)')
+        console.log('- Website button (handles both available and N/A states)')
+        console.log('- Walkthrough video button')
+        console.log('- GitHub button') 
+        console.log('- Screenshot image areas (optional interaction)')
+        console.log('Project regions:', this.clickableRegions['Screen_Projects'])
 
         // Initialize sub-modules
         this.textureManager = new ScreenTextures(this)
