@@ -1,0 +1,34 @@
+const express = require('express');
+const path = require('path');
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+// Serve static files from dist directory with proper MIME types
+app.use(express.static(path.join(__dirname, 'dist'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.gltf')) {
+      res.setHeader('Content-Type', 'model/gltf+json');
+    }
+    if (path.endsWith('.hdr')) {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+    if (path.endsWith('.glb')) {
+      res.setHeader('Content-Type', 'model/gltf-binary');
+    }
+    if (path.endsWith('.webmanifest')) {
+      res.setHeader('Content-Type', 'application/manifest+json');
+    }
+  }
+}));
+
+// Handle client-side routing - send all requests to index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📱 Local: http://localhost:${PORT}`);
+  console.log(`📁 Serving files from: ${path.join(__dirname, 'dist')}`);
+});

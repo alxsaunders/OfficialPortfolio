@@ -12,7 +12,12 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                { from: path.resolve(__dirname, '../static') }
+                { from: path.resolve(__dirname, '../static') },
+                { 
+                    from: path.resolve(__dirname, '../src/images'), 
+                    to: 'images',
+                    noErrorOnMissing: true 
+                }
             ]
         }),
         new HtmlWebpackPlugin({
@@ -44,6 +49,12 @@ module.exports = {
             // Images
             {
                 test: /\.(jpg|png|gif|svg)$/,
+                type: 'asset/resource'
+            },
+
+            // Web manifest and other assets
+            {
+                test: /\.(webmanifest|ico)$/,
                 type: 'asset/resource'
             },
 
