@@ -133,7 +133,7 @@ export default class Screens {
                     {
                         name: 'resumeIcon',
                         bounds: { x1: 0.38, y1: 0.15, x2: 0.43, y2: 0.22 },
-                        action: () => window.open('/path/to/your-resume.pdf', '_blank')
+                        action: () => window.open('https://docs.google.com/document/d/1BoW7F2QhYwRNFThAKsqgA2nz8cfz0WPrc5SnxRSy-zc/edit?usp=sharing', '_blank')
                     }
                 ],
                 skills: [
@@ -176,7 +176,7 @@ export default class Screens {
                     {
                         name: 'resumeIcon',
                         bounds: { x1: 0.56, y1: 0.1, x2: 0.66, y2: 0.25 },
-                        action: () => window.open('/path/to/your-resume.pdf', '_blank')
+                        action: () => window.open('https://docs.google.com/document/d/1BoW7F2QhYwRNFThAKsqgA2nz8cfz0WPrc5SnxRSy-zc/edit?usp=sharing', '_blank')
                     }
                 ],
                 experience: [
@@ -219,7 +219,7 @@ export default class Screens {
                     {
                         name: 'resumeIcon',
                         bounds: { x1: 0.56, y1: 0.1, x2: 0.66, y2: 0.25 },
-                        action: () => window.open('/path/to/your-resume.pdf', '_blank')
+                        action: () => window.open('https://docs.google.com/document/d/1BoW7F2QhYwRNFThAKsqgA2nz8cfz0WPrc5SnxRSy-zc/edit?usp=sharing', '_blank')
                     }
                 ]
             },
