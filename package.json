@@ -1,13 +1,18 @@
 {
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
-    "start": "vite",
+    "start": "node server.js",
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "build": "webpack --config ./bundler/webpack.prod.js",
     "preview": "vite preview",
     "heroku-postbuild": "npm run build"
-    
   },
-  
+  "dependencies": {
+    "express": "^5.1.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.26.7",
     "@babel/preset-env": "^7.26.7",
@@ -26,8 +31,5 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.0",
     "webpack-merge": "^6.0.1"
-  },
-  "dependencies": {
-    "express": "^5.1.0"
   }
 }
