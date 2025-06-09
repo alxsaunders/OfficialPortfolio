@@ -42,7 +42,8 @@
             z-index: 100;
             animation: slideInFromLeft 0.6s ease-out;
             width: auto;
-            max-width: 220px;
+            max-width: 170px;
+            /* Reduced from 220px to ~3/4 size */
             /* Ensure menu doesn't get cut off at bottom */
             max-height: calc(100vh - 160px);
         }
@@ -66,7 +67,8 @@
 
         .nav-menu li {
             display: block;
-            padding: 16px 24px;
+            padding: 16px 18px;
+            /* Reduced horizontal padding from 24px to 18px */
             margin: 8px 0;
             border-radius: 14px;
             cursor: pointer;
@@ -78,8 +80,10 @@
             position: relative;
             overflow: hidden;
             text-align: center;
-            min-width: 160px;
-            max-width: 200px;
+            min-width: 120px;
+            /* Reduced from 160px to ~3/4 size */
+            max-width: 150px;
+            /* Reduced from 200px to ~3/4 size */
             animation: fadeInItemFromLeft 0.4s ease-out forwards;
             opacity: 0;
         }
@@ -150,7 +154,8 @@
         .nav-menu li.external-link::after {
             content: '↗';
             position: absolute;
-            right: 20px;
+            right: 15px;
+            /* Adjusted from 20px to 15px for smaller width */
             top: 50%;
             transform: translateY(-50%);
             font-size: 14px;
@@ -185,9 +190,11 @@
             }
 
             .nav-menu li {
-                padding: 14px 20px;
+                padding: 14px 15px;
+                /* Reduced from 20px to 15px */
                 font-size: 14px;
-                min-width: 140px;
+                min-width: 105px;
+                /* Reduced from 140px to ~3/4 size */
             }
         }
 

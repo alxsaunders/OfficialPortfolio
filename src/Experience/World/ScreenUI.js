@@ -40,13 +40,13 @@ export default class ScreenUI {
         this.exitButton.id = 'exit-screen-button'
         this.exitButton.textContent = 'BACK TO ISLAND'
         
-        // Style the button - MADE LARGER
+        // Style the button - YELLOW TEXT, BOTTOM LEFT POSITION
         this.exitButton.style.position = 'fixed'
-        this.exitButton.style.left = '30px'  // Increased from 20px
-        this.exitButton.style.bottom = '30px'  // Increased from 20px
-        this.exitButton.style.padding = '20px 40px'  // Increased from 10px 20px
+        this.exitButton.style.left = '30px'   // Keep in bottom left
+        this.exitButton.style.bottom = '30px' // Keep in bottom left
+        this.exitButton.style.padding = '20px 40px'
         this.exitButton.style.background = '#2a2a2a'
-        this.exitButton.style.color = 'white'
+        this.exitButton.style.color = '#ffff00'  // Changed to yellow
         this.exitButton.style.border = 'none'
         this.exitButton.style.borderRadius = '8px'  // Increased from 5px
         this.exitButton.style.fontSize = '24px'  // Increased from 16px

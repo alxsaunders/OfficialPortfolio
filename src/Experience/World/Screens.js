@@ -282,7 +282,7 @@ export default class Screens {
         // Project-specific URLs with actual links
         const projectLinks = {
             project1: { // Future Move
-                website: 'https://future-move.weebly.com/',
+                website: null,
                 walkthrough: 'https://youtu.be/dwISjgpyiF8',
                 github: 'https://github.com/alxsaunders/FutureMove'
             },
@@ -406,35 +406,16 @@ export default class Screens {
                 }
                 
                 // Create material for screen using Standard material for good color balance
-                // Updated material settings with brighter values for Credits screen
+                // ALL SCREENS NOW USE THE SAME CONFIGURATION AS THE ABOUT SCREEN
                 let materialConfig = {
                     map: initialTexture,
-                    transparent: true
+                    transparent: true,
+                    color: 0xe6e6e6,  // Same as About screen
+                    roughness: 0.85,  // Same as About screen
+                    metalness: 0.0,   // Same as About screen
+                    emissive: 0x111111,  // Same as About screen
+                    emissiveIntensity: 0.2  // Same as About screen
                 };
-
-                // Configure materials based on screen type
-                if (child.name === 'Screen_Projects') {
-                    // Projects screen - bright and slightly reflective
-                    materialConfig.color = 0xffffff;
-                    materialConfig.roughness = 0.7;
-                    materialConfig.metalness = 0.1;
-                    materialConfig.emissive = 0x333333;
-                    materialConfig.emissiveIntensity = 0.4;
-                } else if (child.name === 'Screen_Credits') {
-                    // Credits screen - make it brighter like Projects
-                    materialConfig.color = 0xffffff;  // Changed from 0xcccccc to full white
-                    materialConfig.roughness = 0.8;   // Slightly less rough than before
-                    materialConfig.metalness = 0.05;  // Add slight metalness
-                    materialConfig.emissive = 0x222222;  // Add emissive glow
-                    materialConfig.emissiveIntensity = 0.3;  // Emissive intensity
-                } else {
-                    // Other screens (About, Video) - moderate brightness
-                    materialConfig.color = 0xe6e6e6;  // Slightly brighter than before
-                    materialConfig.roughness = 0.85;
-                    materialConfig.metalness = 0.0;
-                    materialConfig.emissive = 0x111111;
-                    materialConfig.emissiveIntensity = 0.2;
-                }
                 
                 const material = new THREE.MeshStandardMaterial(materialConfig)
                 

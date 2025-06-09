@@ -6,7 +6,16 @@ export default class LoadingScreen {
     constructor() {
         this.experience = window.experience
         
-        // Loading state
+        // Check if user is on mobile device
+        this.isMobile = this.detectMobile()
+        
+        // If mobile, redirect immediately
+        if (this.isMobile) {
+            this.redirectToMobile()
+            return
+        }
+        
+        // Continue with normal loading screen for desktop
         this.isLoading = true
         this.loadingProgress = 0
         this.minLoadingTime = 5000 // 5 seconds minimum
@@ -24,6 +33,76 @@ export default class LoadingScreen {
         setTimeout(() => {
             this.setupLoadingTracking()
         }, 100)
+    }
+    
+    detectMobile() {
+        // Multiple methods to detect mobile devices
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera
+        
+        // Check user agent
+        const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i
+        const isMobileUserAgent = mobileRegex.test(userAgent.toLowerCase())
+        
+        // Check screen size (common mobile breakpoint)
+        const isMobileScreen = window.innerWidth <= 768
+        
+        // Check touch capability
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+        
+        // Check orientation API (mobile-specific)
+        const hasOrientationAPI = typeof window.orientation !== 'undefined'
+        
+        // Return true if any mobile indicator is present
+        return isMobileUserAgent || (isMobileScreen && isTouchDevice) || hasOrientationAPI
+    }
+    
+    redirectToMobile() {
+        // Create a simple redirect screen
+        const redirectContainer = document.createElement('div')
+        redirectContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        `
+        
+        // Add redirect message
+        const message = document.createElement('div')
+        message.innerHTML = `
+            <h2 style="margin-bottom: 20px; font-weight: 300; font-size: 24px;">Mobile Detected</h2>
+            <p style="margin-bottom: 30px; font-size: 16px; opacity: 0.8;">Redirecting to mobile-optimized version...</p>
+            <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        `
+        
+        redirectContainer.appendChild(message)
+        document.body.appendChild(redirectContainer)
+        
+        // Add CSS animation for spinner
+        const style = document.createElement('style')
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `
+        document.head.appendChild(style)
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+            window.location.href = 'https://alxsaunders.github.io/2D-Portfolio/'
+        }, 1500)
     }
     
     createLoadingScreen() {
@@ -311,7 +390,9 @@ export default class LoadingScreen {
     
     destroy() {
         // Clean up
-        clearInterval(this.dotsInterval)
+        if (this.dotsInterval) {
+            clearInterval(this.dotsInterval)
+        }
         
         if (this.renderer) {
             this.renderer.dispose()
