@@ -11,26 +11,25 @@ export default class Camera {
         this.time = this.experience.time
         this.debug = this.experience.debug
 
-        // EXACT POSITION FROM SCREENSHOT
-        // This matches your current view perfectly
+        // NEW CAMERA POSITION - User Selected (Final)
         this.initialPosition = {
-            x: -3.66, // From screenshot
-            y: 3.04,  // From screenshot
-            z: -20.11 // From screenshot
+            x: -10.78,
+            y: 8.64,
+            z: -15.70
         }
         
-        // Where the camera will animate to (can match initial if no animation desired)
+        // Where the camera will animate to (matches initial for static start)
         this.finalPosition = {
-            x: -3.66, // From screenshot
-            y: 3.04,  // From screenshot
-            z: -20.11
+            x: -10.78,
+            y: 8.64,
+            z: -15.70
         }
         
-        // Camera target position from screenshot
+        // Camera target position - where camera looks at
         this.targetPosition = {
-            x: -3.90, // From screenshot
-            y: 0.49,  // From screenshot
-            z: -1.49  // From screenshot
+            x: -4.51,
+            y: 0.49,
+            z: 0.03
         }
         
         // Other camera configuration
@@ -51,7 +50,7 @@ export default class Camera {
         // Setup
         this.setInstance()
         this.setControls()
-        // this.createPositionDisplay() // COMMENTED OUT
+        // this.createPositionDisplay() // DISABLED - Position found
         
         // Optional: Play intro animation
         // Uncomment this to enable a startup animation
@@ -64,8 +63,6 @@ export default class Camera {
     }
 
     createPositionDisplay() {
-        // COMMENTED OUT - Position display creation
-        /*
         // Create element to display camera position if it doesn't exist
         if (!document.getElementById('camera-position-display')) {
             const positionDisplay = document.createElement('div')
@@ -82,7 +79,6 @@ export default class Camera {
             positionDisplay.style.zIndex = '1000'
             document.body.appendChild(positionDisplay)
         }
-        */
     }
 
     setInstance() {
@@ -250,7 +246,7 @@ export default class Camera {
     update() {
         this.controls.update()
         
-        // COMMENTED OUT - Position logging and display update
+        // DISABLED - Position logging (position found)
         /*
         // Log camera position every 5 seconds
         if (this.time && (this.time.elapsed - this.lastLogTime > this.logInterval)) {
