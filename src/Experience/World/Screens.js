@@ -567,11 +567,12 @@ export default class Screens {
         })
         
         // Reset camera to original position
-        gsap.to(this.camera.instance.position, {
-            duration: 1,
-            x: -3.60,
-            y: 3.35,
-            z: -30.09,
+        // Reset camera to original position
+gsap.to(this.camera.instance.position, {
+    duration: 1,
+    x: -10.78,
+    y: 8.64,
+    z: -15.70,
             ease: "power2.inOut",
             onUpdate: () => {
                 // Force update controls during animation
@@ -590,11 +591,12 @@ export default class Screens {
         })
         
         // Reset camera target
-        gsap.to(this.camera.controls.target, {
-            duration: 1,
-            x: -3.23,
-            y: 0.49,
-            z: -1.49,
+       // Reset camera target
+gsap.to(this.camera.controls.target, {
+    duration: 1,
+    x: -4.51,
+    y: 0.49,
+    z: 0.03,
             ease: "power2.inOut",
             onUpdate: () => {
                 this.camera.controls.update()
