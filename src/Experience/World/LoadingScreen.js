@@ -1,5 +1,4 @@
 // LoadingScreen.js
-import * as THREE from 'three'
 import gsap from 'gsap'
 
 export default class LoadingScreen {
@@ -18,16 +17,12 @@ export default class LoadingScreen {
         // Continue with normal loading screen for desktop
         this.isLoading = true
         this.loadingProgress = 0
-        this.minLoadingTime = 5000 // 5 seconds minimum
+        this.minLoadingTime = 2000 // 2 seconds minimum
         this.startTime = Date.now()
+        this.hiddenElements = []
         
         // Create loading screen elements
         this.createLoadingScreen()
-        this.createScene()
-        this.createSimpleShape()
-        
-        // Start animation immediately
-        this.animate()
         
         // Track resource loading after a delay
         setTimeout(() => {
@@ -106,7 +101,7 @@ export default class LoadingScreen {
     }
     
     createLoadingScreen() {
-        // Create loading screen container
+        // Create loading screen container with blurred background
         this.loadingContainer = document.createElement('div')
         this.loadingContainer.className = 'loading-screen'
         this.loadingContainer.style.cssText = `
@@ -115,7 +110,10 @@ export default class LoadingScreen {
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
+            background-image: url('/textures/portfolio-loading-blur.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             z-index: 10000;
             display: flex;
             flex-direction: column;
@@ -124,157 +122,34 @@ export default class LoadingScreen {
             transition: opacity 0.5s ease;
         `
         
-        // Create canvas for 3D model
-        this.canvas = document.createElement('canvas')
-        this.canvas.className = 'loading-canvas'
-        this.canvas.style.cssText = `
-            width: 300px;
-            height: 300px;
-            margin-bottom: 40px;
+        // Create simple CSS spinner (no Three.js - super smooth!)
+        this.spinner = document.createElement('div')
+        this.spinner.className = 'loading-spinner'
+        this.spinner.style.cssText = `
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         `
-        this.loadingContainer.appendChild(this.canvas)
+        this.loadingContainer.appendChild(this.spinner)
         
-        // Create loading text
-        this.loadingText = document.createElement('div')
-        this.loadingText.className = 'loading-text'
-        this.loadingText.innerHTML = 'Loading<span class="dots">...</span>'
-        this.loadingText.style.cssText = `
-            color: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
+        // Add CSS animation
+        const style = document.createElement('style')
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
         `
-        this.loadingContainer.appendChild(this.loadingText)
-        
-        // Create progress bar
-        this.progressBarContainer = document.createElement('div')
-        this.progressBarContainer.style.cssText = `
-            width: 300px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 40px;
-        `
-        
-        this.progressBar = document.createElement('div')
-        this.progressBar.style.cssText = `
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #00aaff, #0066cc);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        `
-        this.progressBarContainer.appendChild(this.progressBar)
-        this.loadingContainer.appendChild(this.progressBarContainer)
-        
-        // Create enter button (hidden initially)
-        this.enterButton = document.createElement('button')
-        this.enterButton.textContent = 'ENTER'
-        this.enterButton.className = 'enter-button'
-        this.enterButton.style.cssText = `
-            padding: 15px 40px;
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 500;
-            letter-spacing: 3px;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        `
-        
-        // Hover effect
-        this.enterButton.addEventListener('mouseover', () => {
-            this.enterButton.style.background = 'white'
-            this.enterButton.style.color = 'black'
-            this.enterButton.style.transform = 'scale(1.05)'
-        })
-        
-        this.enterButton.addEventListener('mouseout', () => {
-            this.enterButton.style.background = 'transparent'
-            this.enterButton.style.color = 'white'
-            this.enterButton.style.transform = 'scale(1)'
-        })
-        
-        this.enterButton.addEventListener('click', () => {
-            this.hideLoadingScreen()
-        })
-        
-        this.loadingContainer.appendChild(this.enterButton)
+        document.head.appendChild(style)
         
         // Add to body
         document.body.appendChild(this.loadingContainer)
         
-        // Animate dots
-        this.animateDots()
-    }
-    
-    createScene() {
-        // Create separate scene for loading screen
-        this.scene = new THREE.Scene()
-        
-        // Camera
-        this.camera = new THREE.PerspectiveCamera(
-            45,
-            this.canvas.width / this.canvas.height,
-            0.1,
-            1000
-        )
-        this.camera.position.z = 5
-        
-        // Renderer
-        this.renderer = new THREE.WebGLRenderer({
-            canvas: this.canvas,
-            antialias: true,
-            alpha: true // Transparent background
-        })
-        this.renderer.setSize(this.canvas.width, this.canvas.height)
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-        
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-        this.scene.add(ambientLight)
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-        directionalLight.position.set(5, 5, 5)
-        this.scene.add(directionalLight)
-    }
-    
-    createSimpleShape() {
-        // Create a simple circular loader
-        const radius = 1.5
-        const segments = 32
-        
-        // Create the ring geometry
-        const geometry = new THREE.TorusGeometry(radius, 0.1, 8, segments)
-        
-        // Create gradient material
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00aaff,
-            transparent: true,
-            opacity: 0.8
-        })
-        
-        this.ring = new THREE.Mesh(geometry, material)
-        this.scene.add(this.ring)
-        
-        // Create a loading indicator (small sphere that goes around)
-        const indicatorGeometry = new THREE.SphereGeometry(0.15, 16, 8)
-        const indicatorMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff
-        })
-        
-        this.indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial)
-        this.indicator.position.x = radius
-        this.scene.add(this.indicator)
+        // Hide sidebar/UI elements during loading
+        this.hideUIElements()
     }
     
     setupLoadingTracking() {
@@ -288,21 +163,11 @@ export default class LoadingScreen {
         // Track resource loading progress
         this.experience.resources.on('progress', (loaded, total) => {
             this.loadingProgress = (loaded / total) * 100
-            this.updateProgressBar()
         })
         
         this.experience.resources.on('ready', () => {
             this.loadingProgress = 100
-            this.updateProgressBar()
             this.checkLoadingComplete()
-        })
-    }
-    
-    updateProgressBar() {
-        gsap.to(this.progressBar.style, {
-            width: `${this.loadingProgress}%`,
-            duration: 0.3,
-            ease: "power2.out"
         })
     }
     
@@ -310,49 +175,25 @@ export default class LoadingScreen {
         const elapsedTime = Date.now() - this.startTime
         const remainingTime = Math.max(0, this.minLoadingTime - elapsedTime)
         
-        // Wait for minimum loading time
+        // Wait for minimum loading time then auto-hide
         setTimeout(() => {
-            this.showEnterButton()
+            this.hideLoadingScreen()
         }, remainingTime)
-    }
-    
-    showEnterButton() {
-        // Stop the animation
-        this.isLoading = false
-        
-        // Hide loading text, progress bar, and canvas
-        gsap.to([this.loadingText, this.progressBarContainer, this.canvas], {
-            opacity: 0,
-            duration: 0.5,
-            onComplete: () => {
-                this.loadingText.style.display = 'none'
-                this.progressBarContainer.style.display = 'none'
-                this.canvas.style.display = 'none'
-            }
-        })
-        
-        // Show enter button
-        gsap.to(this.enterButton.style, {
-            opacity: 1,
-            duration: 0.5,
-            delay: 0.3,
-            onComplete: () => {
-                this.enterButton.style.pointerEvents = 'auto'
-            }
-        })
     }
     
     hideLoadingScreen() {
         this.isLoading = false
         
-        // Simple fade out
+        // Show UI elements immediately (don't wait for loading screen to finish)
+        this.showUIElements()
+        
+        // Slower, more dramatic fade out (1.2 seconds)
         gsap.to(this.loadingContainer.style, {
             opacity: 0,
-            duration: 0.8,
+            duration: 1.2,
             ease: "power2.inOut",
             onComplete: () => {
                 this.loadingContainer.remove()
-                this.destroy()
                 
                 // Dispatch event that loading is complete
                 window.dispatchEvent(new Event('loadingComplete'))
@@ -360,56 +201,44 @@ export default class LoadingScreen {
         })
     }
     
-    animateDots() {
-        const dotsElement = this.loadingText.querySelector('.dots')
-        let dots = ''
-        let count = 0
+    hideUIElements() {
+        // Hide common UI elements during loading
+        const uiSelectors = [
+            '.sidebar',
+            '.navigation',
+            '.menu',
+            '.controls',
+            '.ui-container',
+            'nav',
+            'aside'
+        ]
         
-        this.dotsInterval = setInterval(() => {
-            count = (count + 1) % 4
-            dots = '.'.repeat(count)
-            dotsElement.textContent = dots.padEnd(3, ' ')
-        }, 500)
+        this.hiddenElements = []
+        
+        uiSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector)
+            elements.forEach(el => {
+                el.style.opacity = '0'
+                el.style.pointerEvents = 'none'
+                this.hiddenElements.push(el)
+            })
+        })
     }
     
-    animate() {
-        if (!this.isLoading) return
-        
-        requestAnimationFrame(() => this.animate())
-        
-        // Animate the indicator going around the circle
-        if (this.indicator) {
-            const time = Date.now() * 0.002
-            this.indicator.position.x = Math.cos(time) * 1.5
-            this.indicator.position.z = Math.sin(time) * 1.5
-        }
-        
-        // Render
-        this.renderer.render(this.scene, this.camera)
-    }
-    
-    destroy() {
-        // Clean up
-        if (this.dotsInterval) {
-            clearInterval(this.dotsInterval)
-        }
-        
-        if (this.renderer) {
-            this.renderer.dispose()
-        }
-        
-        // Clean up ring
-        if (this.ring) {
-            this.scene.remove(this.ring)
-            if (this.ring.geometry) this.ring.geometry.dispose()
-            if (this.ring.material) this.ring.material.dispose()
-        }
-        
-        // Clean up indicator
-        if (this.indicator) {
-            this.scene.remove(this.indicator)
-            if (this.indicator.geometry) this.indicator.geometry.dispose()
-            if (this.indicator.material) this.indicator.material.dispose()
+    showUIElements() {
+        // Fade in UI elements quickly
+        if (this.hiddenElements && this.hiddenElements.length > 0) {
+            this.hiddenElements.forEach((el, index) => {
+                gsap.to(el, {
+                    opacity: 1,
+                    duration: 0.4,  // Smooth and fast
+                    delay: 0, // No stagger - all at once
+                    ease: "power2.out",
+                    onComplete: () => {
+                        el.style.pointerEvents = 'auto'
+                    }
+                })
+            })
         }
     }
 }
