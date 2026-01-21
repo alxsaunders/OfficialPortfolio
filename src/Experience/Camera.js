@@ -218,20 +218,31 @@ export default class Camera {
     }
     
     resetCamera() {
+        // Disable controls during reset
+        this.controls.enabled = false
+        
+        // Animate both simultaneously with smooth easing
         gsap.to(this.instance.position, {
-            duration: 1,
+            duration: 1.8,
             x: this.initialPosition.x,
             y: this.initialPosition.y,
             z: this.initialPosition.z,
-            ease: "power2.out"
+            ease: "power1.inOut",
+            onUpdate: () => {
+                this.controls.update()
+            },
+            onComplete: () => {
+                this.controls.enabled = true
+                console.log('Camera reset to initial position')
+            }
         })
         
         gsap.to(this.controls.target, {
-            duration: 1,
+            duration: 1.8,
             x: this.targetPosition.x,
             y: this.targetPosition.y,
             z: this.targetPosition.z,
-            ease: "power2.out",
+            ease: "power1.inOut",
             onUpdate: () => {
                 this.controls.update()
             }
