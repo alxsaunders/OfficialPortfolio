@@ -18,18 +18,32 @@ export default class ScreenNavigation {
         // Create list
         const ul = document.createElement('ul')
         
-        // Navigation items
+        // Navigation items with icons (using emoji for now, can be replaced with SVG icons)
         const navItems = [
-            { text: 'Projects', screen: 'Screen_Projects' },
-            { text: 'About', screen: 'Screen_About' },
-            { text: 'Credits', screen: 'Screen_Credits' },
-            { text: '2D Portfolio', screen: 'Screen_Video' }
+            { text: 'Projects', screen: 'Screen_Projects', icon: '💼' },
+            { text: 'About', screen: 'Screen_About', icon: '👤' },
+            { text: 'Contact', screen: 'Screen_Credits', icon: '📧' },
+            { text: '2D Portfolio', screen: 'Screen_Video', icon: '🎨' }
         ]
         
         navItems.forEach(item => {
             const li = document.createElement('li')
-            li.textContent = item.text
             li.setAttribute('data-screen', item.screen)
+            
+            // Create icon span
+            const iconSpan = document.createElement('span')
+            iconSpan.className = 'nav-icon'
+            iconSpan.textContent = item.icon
+            
+            // Create text span
+            const textSpan = document.createElement('span')
+            textSpan.className = 'nav-text'
+            textSpan.textContent = item.text
+            
+            // Append both to li
+            li.appendChild(iconSpan)
+            li.appendChild(textSpan)
+            
             ul.appendChild(li)
         })
         
