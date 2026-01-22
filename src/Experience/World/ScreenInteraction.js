@@ -10,7 +10,39 @@ export default class ScreenInteraction {
         this.raycaster = new THREE.Raycaster()
         this.mouse = new THREE.Vector2()
 
+        // Custom cursor setup
+        this.setupCustomCursor()
+        
         this.setupInteraction()
+    }
+
+    setupCustomCursor() {
+        // Create custom cursor element
+        this.cursorElement = document.createElement('div')
+        this.cursorElement.className = 'custom-cursor'
+        document.body.appendChild(this.cursorElement)
+        
+        // Add class to body to hide default cursor
+        document.body.classList.add('custom-cursor-active')
+        
+        // Track mouse position for cursor
+        this.cursorPosition = { x: 0, y: 0 }
+        
+        window.addEventListener('mousemove', (event) => {
+            this.cursorPosition.x = event.clientX
+            this.cursorPosition.y = event.clientY
+            this.cursorElement.style.left = this.cursorPosition.x + 'px'
+            this.cursorElement.style.top = this.cursorPosition.y + 'px'
+        })
+        
+        // Handle click animation
+        window.addEventListener('mousedown', () => {
+            this.cursorElement.classList.add('clicked')
+        })
+        
+        window.addEventListener('mouseup', () => {
+            this.cursorElement.classList.remove('clicked')
+        })
     }
 
     setupInteraction() {
@@ -66,7 +98,8 @@ export default class ScreenInteraction {
             
             // Reset each screen to its starting sub-navigation state
             if (screenMesh.name === 'Screen_About') {
-                screenState.currentTab = 'main'
+                screenState.currentTab = 'experience'  // Start at experience tab
+                console.log('About screen currentTab set to:', screenState.currentTab)
             } else if (screenMesh.name === 'Screen_Projects') {
                 screenState.currentView = 'main'
             } else if (screenMesh.name === 'Screen_Credits') {
@@ -78,7 +111,14 @@ export default class ScreenInteraction {
                 opacity: 0,
                 duration: 0.3,
                 onComplete: () => {
-                    screenMesh.material.map = screenState.textures.main
+                    // Load the appropriate starting texture based on screen type
+                    if (screenMesh.name === 'Screen_About') {
+                        console.log('Loading About screen with EXPERIENCE tab')
+                        screenMesh.material.map = screenState.textures.experience
+                    } else {
+                        screenMesh.material.map = screenState.textures.main
+                    }
+                    screenMesh.material.needsUpdate = true
                     gsap.to(screenMesh.material, {
                         opacity: 1,
                         duration: 0.3
@@ -136,8 +176,8 @@ export default class ScreenInteraction {
             Object.values(this.screens.screenMeshes)
         )
 
-        // Reset cursor and all screens
-        document.body.style.cursor = 'default'
+        // Reset cursor classes and all screens
+        this.cursorElement.classList.remove('hovering-screen', 'hovering-clickable')
         Object.values(this.screens.screenMeshes).forEach(screen => {
             if(screen !== this.screens.activeScreen) {
                 screen.material.opacity = 1
@@ -150,8 +190,8 @@ export default class ScreenInteraction {
             const screenMesh = intersect.object
             const screenState = this.screens.states[screenMesh.name]
             
-            // Show pointer cursor for any screen hover
-            document.body.style.cursor = 'pointer'
+            // Show hovering-screen cursor state
+            this.cursorElement.classList.add('hovering-screen')
             
             // Only check clickable regions if not in cover mode
             if (screenState && (!screenState.hasOwnProperty('inCoverMode') || !screenState.inCoverMode)) {
@@ -165,6 +205,9 @@ export default class ScreenInteraction {
                 for(const region of regions) {
                     if(uv.x >= region.bounds.x1 && uv.x <= region.bounds.x2 && 
                        uv.y >= region.bounds.y1 && uv.y <= region.bounds.y2) {
+                        // Show hovering-clickable cursor state
+                        this.cursorElement.classList.remove('hovering-screen')
+                        this.cursorElement.classList.add('hovering-clickable')
                         return
                     }
                 }
