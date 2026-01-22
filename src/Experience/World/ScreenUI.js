@@ -304,15 +304,15 @@ export default class ScreenUI {
         
         this.debugPanel.appendChild(controls)
         
-        // Add keyboard shortcut to toggle debug panels
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'd' && e.ctrlKey) {
-                const isDebugVisible = this.debugPanel.style.display === 'flex'
-                this.debugPanel.style.display = isDebugVisible ? 'none' : 'flex'
-                this.boundsPanel.style.display = isDebugVisible ? 'none' : 'flex'
-                this.projectDetailPanel.style.display = isDebugVisible ? 'none' : 'flex'
-            }
-        })
+        // DISABLED: Keyboard shortcut to toggle debug panels (for production)
+        // document.addEventListener('keydown', (e) => {
+        //     if (e.key === 'd' && e.ctrlKey) {
+        //         const isDebugVisible = this.debugPanel.style.display === 'flex'
+        //         this.debugPanel.style.display = isDebugVisible ? 'none' : 'flex'
+        //         this.boundsPanel.style.display = isDebugVisible ? 'none' : 'flex'
+        //         this.projectDetailPanel.style.display = isDebugVisible ? 'none' : 'flex'
+        //     }
+        // })
         
         // Store screen selector reference
         this.screenSelect = screenSelect
