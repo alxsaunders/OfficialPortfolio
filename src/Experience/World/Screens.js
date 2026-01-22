@@ -47,7 +47,7 @@ export default class Screens {
         // Track current states for each screen
         this.states = {
             'Screen_About': {
-                currentTab: 'main',
+                currentTab: 'experience',  // Start at experience tab (middle tab)
                 textures: {
                     cover: this.resources.items.aboutcoverTexture,
                     main: this.resources.items.aboutMainTexture,
@@ -128,7 +128,11 @@ export default class Screens {
                     {
                         name: 'emailIcon',
                         bounds: { x1: 0.32, y1: 0.15, x2: 0.37, y2: 0.22 },
-                        action: () => window.open('mailto:alexsaunders242@gmail.com', '_blank')
+                        action: () => {
+                            navigator.clipboard.writeText('alexsaunders242@gmail.com')
+                                .then(() => this.showNotification('Email copied to clipboard!', 'success'))
+                                .catch(() => alert('Email: alexsaunders242@gmail.com'))
+                        }
                     },
                     {
                         name: 'resumeIcon',
@@ -171,7 +175,11 @@ export default class Screens {
                     {
                         name: 'emailIcon',
                         bounds: { x1: 0.44, y1: 0.1, x2: 0.54, y2: 0.25 },
-                        action: () => window.open('mailto:alexsaunders242@gmail.com', '_blank')
+                        action: () => {
+                            navigator.clipboard.writeText('alexsaunders242@gmail.com')
+                                .then(() => this.showNotification('Email copied to clipboard!', 'success'))
+                                .catch(() => alert('Email: alexsaunders242@gmail.com'))
+                        }
                     },
                     {
                         name: 'resumeIcon',
@@ -214,7 +222,11 @@ export default class Screens {
                     {
                         name: 'emailIcon',
                         bounds: { x1: 0.44, y1: 0.1, x2: 0.54, y2: 0.25 },
-                        action: () => window.open('mailto:alexsaunders242@gmail.com', '_blank')
+                        action: () => {
+                            navigator.clipboard.writeText('alexsaunders242@gmail.com')
+                                .then(() => this.showNotification('Email copied to clipboard!', 'success'))
+                                .catch(() => alert('Email: alexsaunders242@gmail.com'))
+                        }
                     },
                     {
                         name: 'resumeIcon',
@@ -272,7 +284,31 @@ export default class Screens {
             },
             'Screen_Credits': {
                 cover: [], // No regions on cover image, clicking anywhere enters the screen
-                main: []
+                main: [
+                    // Email button - top button
+                    {
+                        name: 'emailButton',
+                        bounds: { x1: 0.08, y1: 0.55, x2: 0.52, y2: 0.75 },
+                        action: () => {
+                            // Copy email to clipboard
+                            navigator.clipboard.writeText('alexsaunders242@gmail.com')
+                                .then(() => {
+                                    // Show success notification
+                                    this.showNotification('Email copied to clipboard!', 'success')
+                                })
+                                .catch(() => {
+                                    // Fallback: show email in alert
+                                    alert('Email: alexsaunders242@gmail.com')
+                                })
+                        }
+                    },
+                    // LinkedIn button - bottom button
+                    {
+                        name: 'linkedinButton',
+                        bounds: { x1: 0.08, y1: 0.30, x2: 0.52, y2: 0.50 },
+                        action: () => window.open('https://www.linkedin.com/in/alxsaunders/', '_blank')
+                    }
+                ]
             },
             'Screen_Video': {
                 main: []
@@ -406,16 +442,32 @@ export default class Screens {
                 }
                 
                 // Create material for screen using Standard material for good color balance
-                // ALL SCREENS NOW USE THE SAME CONFIGURATION AS THE ABOUT SCREEN
-                let materialConfig = {
-                    map: initialTexture,
-                    transparent: true,
-                    color: 0xe6e6e6,  // Same as About screen
-                    roughness: 0.85,  // Same as About screen
-                    metalness: 0.0,   // Same as About screen
-                    emissive: 0x111111,  // Same as About screen
-                    emissiveIntensity: 0.2  // Same as About screen
-                };
+                // Apply different brightness for About screen vs other screens
+                let materialConfig;
+                
+                if (child.name === 'Screen_About') {
+                    // ABOUT SCREEN - REDUCED BRIGHTNESS
+                    materialConfig = {
+                        map: initialTexture,
+                        transparent: true,
+                        color: 0x999999,  // Perfect middle gray - balanced brightness
+                        roughness: 0.9,   // Increased roughness for less reflection
+                        metalness: 0.0,
+                        emissive: 0x000000,  // No emissive light
+                        emissiveIntensity: 0.0  // No emissive intensity
+                    };
+                } else {
+                    // ALL OTHER SCREENS - NORMAL BRIGHTNESS
+                    materialConfig = {
+                        map: initialTexture,
+                        transparent: true,
+                        color: 0xe6e6e6,
+                        roughness: 0.85,
+                        metalness: 0.0,
+                        emissive: 0x111111,
+                        emissiveIntensity: 0.2
+                    };
+                }
                 
                 const material = new THREE.MeshStandardMaterial(materialConfig)
                 
@@ -555,7 +607,7 @@ export default class Screens {
                 
                 // Reset sub-navigation to starting state
                 if (screenName === 'Screen_About') {
-                    screenState.currentTab = 'main'
+                    screenState.currentTab = 'experience'  // Reset to experience tab
                 } else if (screenName === 'Screen_Projects') {
                     screenState.currentView = 'main'
                 } else if (screenName === 'Screen_Credits') {
@@ -567,12 +619,11 @@ export default class Screens {
         })
         
         // Reset camera to original position
-        // Reset camera to original position
-gsap.to(this.camera.instance.position, {
-    duration: 1,
-    x: -10.78,
-    y: 8.64,
-    z: -15.70,
+        gsap.to(this.camera.instance.position, {
+            duration: 1,
+            x: -10.78,
+            y: 8.64,
+            z: -15.70,
             ease: "power2.inOut",
             onUpdate: () => {
                 // Force update controls during animation
@@ -591,12 +642,11 @@ gsap.to(this.camera.instance.position, {
         })
         
         // Reset camera target
-       // Reset camera target
-gsap.to(this.camera.controls.target, {
-    duration: 1,
-    x: -4.51,
-    y: 0.49,
-    z: 0.03,
+        gsap.to(this.camera.controls.target, {
+            duration: 1,
+            x: -4.51,
+            y: 0.49,
+            z: 0.03,
             ease: "power2.inOut",
             onUpdate: () => {
                 this.camera.controls.update()
@@ -637,6 +687,7 @@ gsap.to(this.camera.controls.target, {
             duration: 0.3,
             onComplete: () => {
                 screen.material.map = screenState.textures[tab]
+                screen.material.needsUpdate = true
                 gsap.to(screen.material, {
                     opacity: 1,
                     duration: 0.3
@@ -683,6 +734,50 @@ gsap.to(this.camera.controls.target, {
         })
         
         screenState.currentView = 'main'
+    }
+    
+    // Show notification for user feedback (e.g., email copied)
+    showNotification(message, type = 'success') {
+        // Create notification element
+        const notification = document.createElement('div')
+        notification.textContent = message
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            background: ${type === 'success' ? '#2196F3' : '#f44336'};
+            color: white;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: fadeInOut 2s ease-in-out;
+        `
+        
+        // Add animation keyframes if not already added
+        if (!document.querySelector('#notification-style')) {
+            const style = document.createElement('style')
+            style.id = 'notification-style'
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+            `
+            document.head.appendChild(style)
+        }
+        
+        document.body.appendChild(notification)
+        
+        // Remove notification after animation
+        setTimeout(() => {
+            notification.remove()
+        }, 2000)
     }
     
     update() {
