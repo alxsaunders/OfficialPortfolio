@@ -941,4 +941,4 @@ export default class ScreenUI {
             .then(() => alert('UV values copied to clipboard!'))
             .catch(() => alert('Failed to copy to clipboard'))
     }
-}
+}       

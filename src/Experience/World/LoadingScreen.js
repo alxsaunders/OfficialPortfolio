@@ -5,6 +5,10 @@ export default class LoadingScreen {
     constructor() {
         this.experience = window.experience
         
+        // IMMEDIATELY hide UI elements before anything else
+        this.hiddenElements = []
+        this.hideUIElementsImmediately()
+        
         // Check if user is on mobile device
         this.isMobile = this.detectMobile()
         
@@ -19,7 +23,6 @@ export default class LoadingScreen {
         this.loadingProgress = 0
         this.minLoadingTime = 2000 // 2 seconds minimum
         this.startTime = Date.now()
-        this.hiddenElements = []
         
         // Create loading screen elements
         this.createLoadingScreen()
@@ -147,9 +150,6 @@ export default class LoadingScreen {
         
         // Add to body
         document.body.appendChild(this.loadingContainer)
-        
-        // Hide sidebar/UI elements during loading
-        this.hideUIElements()
     }
     
     setupLoadingTracking() {
@@ -201,8 +201,8 @@ export default class LoadingScreen {
         })
     }
     
-    hideUIElements() {
-        // Hide common UI elements during loading
+    hideUIElementsImmediately() {
+        // Immediately hide UI elements with inline styles (no GSAP delay)
         const uiSelectors = [
             '.sidebar',
             '.navigation',
@@ -213,13 +213,12 @@ export default class LoadingScreen {
             'aside'
         ]
         
-        this.hiddenElements = []
-        
         uiSelectors.forEach(selector => {
             const elements = document.querySelectorAll(selector)
             elements.forEach(el => {
                 el.style.opacity = '0'
                 el.style.pointerEvents = 'none'
+                el.style.visibility = 'hidden'
                 this.hiddenElements.push(el)
             })
         })
@@ -229,10 +228,11 @@ export default class LoadingScreen {
         // Fade in UI elements quickly
         if (this.hiddenElements && this.hiddenElements.length > 0) {
             this.hiddenElements.forEach((el, index) => {
+                el.style.visibility = 'visible' // Restore visibility immediately
                 gsap.to(el, {
                     opacity: 1,
-                    duration: 0.4,  // Smooth and fast
-                    delay: 0, // No stagger - all at once
+                    duration: 0.4,
+                    delay: 0,
                     ease: "power2.out",
                     onComplete: () => {
                         el.style.pointerEvents = 'auto'
